@@ -20,14 +20,14 @@ constexpr auto _INPUT_BUFFER_SAFETY_FACTOR = 32;
 DSP::DSP() { this->_stale_params = true; }
 
 void DSP::process(const NAMSample *input, NAMSample *output,
-                  const int num_channels, const int num_frames,
+                  const int num_frames,
                   const double input_gain, const double output_gain,
                   const std::unordered_map<std::string, double> &params) {
   this->_get_params_(params);
-  this->_apply_input_level_(input, num_channels, num_frames, input_gain);
+  this->_apply_input_level_(input, num_frames, input_gain);
   this->_ensure_core_dsp_output_ready_();
   this->_process_core_();
-  this->_apply_output_level_(output, num_channels, num_frames, output_gain);
+  this->_apply_output_level_(output, num_frames, output_gain);
 }
 
 void DSP::finalize_(const int num_frames) {}
@@ -46,14 +46,12 @@ void DSP::_get_params_(
   }
 }
 
-void DSP::_apply_input_level_(const NAMSample *input, const int num_channels,
-                              const int num_frames, const double gain) {
+void DSP::_apply_input_level_(const NAMSample *input, const int num_frames, const double gain) {
   // Must match exactly; we're going to use the size of _input_post_gain later
   // for num_frames.
   if (this->_input_post_gain.size() != num_frames)
     this->_input_post_gain.resize(num_frames);
-  // MONO ONLY
-  const int channel = 0;
+
   for (int i = 0; i < num_frames; i++)
     this->_input_post_gain[i] = float(gain * input[i]);
 }
@@ -69,11 +67,9 @@ void DSP::_process_core_() {
     this->_core_dsp_output[i] = this->_input_post_gain[i];
 }
 
-void DSP::_apply_output_level_(NAMSample *output, const int num_channels,
-                               const int num_frames, const double gain) {
-  for (int c = 0; c < num_channels; c++)
-    for (int s = 0; s < num_frames; s++)
-      output[s] = NAMSample(gain * this->_core_dsp_output[s]);
+void DSP::_apply_output_level_(NAMSample *output, const int num_frames, const double gain) {
+  for (int s = 0; s < num_frames; s++)
+    output[s] = NAMSample(gain * this->_core_dsp_output[s]);
 }
 
 // Buffer =====================================================================

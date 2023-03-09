@@ -20,8 +20,6 @@ namespace NAM {
 		static constexpr std::string_view URI = "http://github.com/mikeoliphant/neural-amp-modeler-lv2";
 
 		struct Ports {
-			const LV2_Atom_Sequence* control;
-			LV2_Atom_Sequence* notify;
 			const float* audio_in;
 			float* audio_out;
 		};

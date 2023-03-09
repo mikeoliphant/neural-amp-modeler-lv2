@@ -10,21 +10,11 @@
 @prefix units: <http://lv2plug.in/ns/extensions/units#>.
 @prefix urid:  <http://lv2plug.in/ns/ext/urid#>.
 @prefix param: <http://lv2plug.in/ns/ext/parameters#>.
-@prefix pg:    <http://lv2plug.in/ns/ext/port-groups#>.
 
 <@NAM_LV2_ID@>
 	a doap:Project;
 	doap:maintainer <http://github.com/mikeoliphant>;
 	doap:name "Neural Amp Modeler".
-
-<@NAM_LV2_ID@#input>
-	a pg:MonoGroup, pg:InputGroup;
-	lv2:symbol "input".
-
-<h@NAM_LV2_ID@#output>
-	a pg:MonoGroup, pg:OutputGroup;
-	lv2:symbol "output";
-	pg:source <@NAM_LV2_ID@#input>.
 
 <http://github.com/mikeoliphant/neural-amp-modeler-lv2>
 	a lv2:Plugin, lv2:AmplifierPlugin;
@@ -39,49 +29,24 @@
 
 	rdfs:comment "An LV2 implementation of Neural Amp Modeler";
 
-	pg:mainInput <@NAM_LV2_ID@#input>;
-	pg:mainOutput <@NAM_LV2_ID@#output>;
-
-	# Control Ports
+	# Audio Ports
 	lv2:port [
-		a lv2:InputPort, atom:AtomPort;
-		atom:bufferType atom:Sequence;
-		lv2:designation lv2:control ;
-		lv2:index 0;
-		lv2:symbol "control";
-		lv2:name "control";
-		rdfs:comment "UI -> DSP communication"
-	], [
-		a lv2:OutputPort, atom:AtomPort;
-		atom:bufferType atom:Sequence;
-		lv2:designation lv2:control ;
-		lv2:index 1;
-		lv2:symbol "notify";
-		lv2:name "Notify";
-		# amount of data sent in a single 8192 sample process block
-		rsz:minimumSize 131428;
-		rdfs:comment "DSP -> UI communication"
-	], [
 		a lv2:InputPort, lv2:AudioPort;
-		lv2:index 2;
+		lv2:index 0;
 		lv2:symbol "input";
 		lv2:name "Input";
-		pg:group <http://github.com/mikeoliphant/neural-amp-modeler-lv2#input>;
-		lv2:designation pg:left
 	], [
 		a lv2:OutputPort, lv2:AudioPort;
-		lv2:index 3;
+		lv2:index 1;
 		lv2:symbol "output";
 		lv2:name "Output";
-		pg:group <http://github.com/mikeoliphant/neural-amp-modeler-lv2#output>;
-		lv2:designation pg:left
 	];
 
 	# Mixer
 	lv2:port [
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:designation param:wetDryRatio;
-		lv2:index 4;
+		lv2:index 2;
 		lv2:symbol "mix";
 		lv2:name "Mix";
 		rdfs:comment "dry/wet ratio";
