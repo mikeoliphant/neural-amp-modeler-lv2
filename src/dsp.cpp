@@ -73,7 +73,7 @@ void DSP::_apply_output_level_(NAMSample *output, const int num_channels,
                                const int num_frames, const double gain) {
   for (int c = 0; c < num_channels; c++)
     for (int s = 0; s < num_frames; s++)
-      output[s] = double(gain * this->_core_dsp_output[s]);
+      output[s] = NAMSample(gain * this->_core_dsp_output[s]);
 }
 
 // Buffer =====================================================================
