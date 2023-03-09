@@ -1,22 +1,26 @@
 @prefix atom:  <http://lv2plug.in/ns/ext/atom#>.
 @prefix doap:  <http://usefulinc.com/ns/doap#>.
-@prefix foaf:  <http://xmlns.com/foaf/0.1/>.
 @prefix lv2:   <http://lv2plug.in/ns/lv2core#>.
-@prefix props: <http://lv2plug.in/ns/ext/port-props#>.
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
-@prefix rsz:   <http://lv2plug.in/ns/ext/resize-port#>.
 @prefix ui:    <http://lv2plug.in/ns/extensions/ui#>.
 @prefix units: <http://lv2plug.in/ns/extensions/units#>.
 @prefix urid:  <http://lv2plug.in/ns/ext/urid#>.
 @prefix param: <http://lv2plug.in/ns/ext/parameters#>.
+@prefix patch: <http://lv2plug.in/ns/ext/patch#>.
+@prefix state: <http://lv2plug.in/ns/ext/state#>.
 
 <@NAM_LV2_ID@>
 	a doap:Project;
 	doap:maintainer <http://github.com/mikeoliphant>;
 	doap:name "Neural Amp Modeler".
 
-<http://github.com/mikeoliphant/neural-amp-modeler-lv2>
+<@NAM_LV2_ID@#model>
+        a lv2:Parameter;
+        rdfs:label "Model";
+        rdfs:range atom:Path.
+
+<@NAM_LV2_ID@>
 	a lv2:Plugin, lv2:AmplifierPlugin;
 	doap:name "Neural Amp Modeler";
 	lv2:project <@NAM_LV2_ID@>;
@@ -28,6 +32,8 @@
 	lv2:optionalFeature lv2:hardRTCapable;
 
 	rdfs:comment "An LV2 implementation of Neural Amp Modeler";
+
+	patch:writable <@NAM_LV2_ID@#model>;
 
 	# Audio Ports
 	lv2:port [
@@ -41,17 +47,6 @@
 		lv2:symbol "output";
 		lv2:name "Output";
 	];
-
-	# Mixer
-	lv2:port [
-		a lv2:InputPort, lv2:ControlPort;
-		lv2:designation param:wetDryRatio;
-		lv2:index 2;
-		lv2:symbol "mix";
-		lv2:name "Mix";
-		rdfs:comment "dry/wet ratio";
-		lv2:default 100.0;
-		lv2:minimum 0.0;
-		lv2:maximum 100.0;
-		units:unit units:pc
-	].
+        state:state [
+                <@NAM_LV2_ID@#model> <click.wav> ;
+        ].

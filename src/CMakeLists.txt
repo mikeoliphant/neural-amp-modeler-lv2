@@ -23,24 +23,12 @@ set_target_properties(neural_amp_modeler
 
 # Compile Options
 
-option(FORCE_DISABLE_DENORMALS "Disable denormal numbers before processing" ON)
-target_compile_definitions(neural_amp_modeler
-	PRIVATE
-	"$<$<CONFIG:RELEASE>:NDEBUG>"
-	"$<$<BOOL:${FORCE_DISABLE_DENORMALS}>:FORCE_DISABLE_DENORMALS>"
-)
-
-# Architecture
-if (
-	FORCE_DISABLE_DENORMALS
-	AND CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(i386)|(i686)|(AMD64)"
-)
-	if (MSVC)
-		target_compile_options(neural_amp_modeler PRIVATE /arch:SSE2)
-	else()
-		target_compile_options(neural_amp_modeler PRIVATE -msse3)
-	endif()
+if (MSVC)
+	target_compile_options(neural_amp_modeler PRIVATE /Ot )
+else()
+	target_compile_options(neural_amp_modeler PRIVATE -msse3)
 endif()
+
 
 
 # Platform

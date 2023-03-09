@@ -48,12 +48,7 @@ static LV2_Handle instantiate(
 
 static void connect_port(LV2_Handle instance, uint32_t port, void* data) {
 	auto nam = static_cast<NAM::Plugin*>(instance);
-	constexpr uint32_t misc_port_cnt = sizeof(nam->ports)/sizeof(void*);
-	if (port >= misc_port_cnt)
-	{
-	}
-	else
-		*(reinterpret_cast<void**>(&nam->ports)+port) = data;
+  *(reinterpret_cast<void**>(&nam->ports)+port) = data;
 }
 
 static void activate(LV2_Handle) {}
