@@ -28,7 +28,7 @@ add_subdirectory(src)
 # create neural_amp_modeler.lv2
 add_custom_target(copy_binaries ALL
 	${CMAKE_COMMAND} -E copy "$<TARGET_FILE:neural_amp_modeler>" neural_amp_modeler.lv2/
-	DEPENDS neural-amp-modeler
+	DEPENDS neural_amp_modeler
 )
 
 configure_file(resources/manifest.ttl.in neural_amp_modeler.lv2/manifest.ttl)
