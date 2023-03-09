@@ -21,15 +21,6 @@ set_target_properties(neural_amp_modeler
 	PREFIX ""
 )
 
-# Compile Options
-
-if (MSVC)
-	target_compile_options(neural_amp_modeler PRIVATE /Ot )
-else()
-	target_compile_options(neural_amp_modeler PRIVATE -msse3)
-endif()
-
-
 
 # Platform
 
