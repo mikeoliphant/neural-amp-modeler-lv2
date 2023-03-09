@@ -12,29 +12,24 @@
 @prefix param: <http://lv2plug.in/ns/ext/parameters#>.
 @prefix pg:    <http://lv2plug.in/ns/ext/port-groups#>.
 
-<http://github.com/mikeoliphant>
-	a foaf:Person;
-	foaf:name "Mike Oliphant";
-	foaf:homepage <http://github.com/mikeoliphant>.
-
-<http://github.com/mikeoliphant/neural-amp-modeler-lv2>
+<@NAM_LV2_ID@>
 	a doap:Project;
 	doap:maintainer <http://github.com/mikeoliphant>;
 	doap:name "Neural Amp Modeler".
 
-<http://github.com/mikeoliphant/neural-amp-modeler-lv2#input>
+<@NAM_LV2_ID@#input>
 	a pg:MonoGroup, pg:InputGroup;
 	lv2:symbol "input".
 
-<http://github.com/mikeoliphant/neural-amp-modeler-lv2#output>
+<h@NAM_LV2_ID@#output>
 	a pg:MonoGroup, pg:OutputGroup;
 	lv2:symbol "output";
-	pg:source <http://github.com/mikeoliphant/neural-amp-modeler-lv2#input>.
+	pg:source <@NAM_LV2_ID@#input>.
 
 <http://github.com/mikeoliphant/neural-amp-modeler-lv2>
 	a lv2:Plugin, lv2:AmplifierPlugin;
 	doap:name "Neural Amp Modeler";
-	lv2:project <http://github.com/mikeoliphant/neural-amp-modeler-lv2>;
+	lv2:project <@NAM_LV2_ID@>;
 	lv2:minorVersion @PROJECT_VERSION_MINOR@;
 	lv2:microVersion @PROJECT_VERSION_PATCH@;
 	doap:license <http://opensource.org/licenses/MIT>;
@@ -44,8 +39,8 @@
 
 	rdfs:comment "An LV2 implementation of Neural Amp Modeler";
 
-	pg:mainInput <http://github.com/mikeoliphant/neural-amp-modeler-lv2#input>;
-	pg:mainOutput <http://github.com/mikeoliphant/neural-amp-modeler-lv2#output>;
+	pg:mainInput <@NAM_LV2_ID@#input>;
+	pg:mainOutput <@NAM_LV2_ID@#output>;
 
 	# Control Ports
 	lv2:port [

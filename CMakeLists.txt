@@ -17,6 +17,7 @@ else()
 	message(FATAL_ERROR "Unrecognized Platform!")
 endif()
 
+set(NAM_LV2_ID http://github.com/mikeoliphant/neural-amp-modeler-lv2)
 
 include_directories(SYSTEM eigen)
 include_directories(SYSTEM lv2/include)
