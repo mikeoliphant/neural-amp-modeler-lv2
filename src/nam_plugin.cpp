@@ -10,7 +10,7 @@
 namespace NAM {
 	Plugin::Plugin(float rate)
 	{
-		namModel = get_dsp("C:\\Users\\oliph\\AppData\\Roaming\\GuitarSim\\NAM\\JCM2000Crunch.nam");
+		namModel = get_dsp("C:\\Users\\oliph\\AppData\\Roaming\\GuitarSim\\NAM\\AC15Brkup.nam");
 	}
 
 	void Plugin::map_uris(LV2_URID_Map* map) noexcept {

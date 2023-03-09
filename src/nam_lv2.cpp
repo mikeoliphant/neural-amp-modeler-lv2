@@ -12,10 +12,6 @@
 
 #include "nam_plugin.hpp"
 
-#ifdef FORCE_DISABLE_DENORMALS
-	#include "architecture.hpp"
-#endif
-
 // LV2 Functions
 static LV2_Handle instantiate(
 	const LV2_Descriptor*,
@@ -64,19 +60,7 @@ static void activate(LV2_Handle) {}
 
 static void run(LV2_Handle instance, uint32_t n_samples) {
 
-	#ifdef FORCE_DISABLE_DENORMALS
-		std::fenv_t fe_state;
-		std::feholdexcept(&fe_state);
-
-		disable_denormals();
-	#endif
-
 	static_cast<NAM::Plugin*>(instance)->process(n_samples);
-
-	#ifdef FORCE_DISABLE_DENORMALS
-		// restore previous floating point state
-		std::feupdateenv(&fe_state);
-	#endif
 }
 
 static void deactivate(LV2_Handle) {}
