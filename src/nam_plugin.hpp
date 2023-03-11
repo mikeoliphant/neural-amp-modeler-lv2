@@ -13,13 +13,16 @@
 
 #include "dsp.h"
 
+#define PlUGIN_URI "http://github.com/mikeoliphant/neural-amp-modeler-lv2"
+#define MODEL_URI PlUGIN_URI "#model"
+
 namespace NAM {
 
 	class Plugin {
 	public:
-		static constexpr std::string_view URI = "http://github.com/mikeoliphant/neural-amp-modeler-lv2";
-
 		struct Ports {
+			const LV2_Atom_Sequence* control;
+			LV2_Atom_Sequence* notify;
 			const float* audio_in;
 			float* audio_out;
 		};
@@ -49,6 +52,13 @@ namespace NAM {
 		struct URIs {
 			LV2_URID atom_Object;
 			LV2_URID atom_Float;
+			LV2_URID atom_Int;
+			LV2_URID atom_Path;
+			LV2_URID atom_URID;
+			LV2_URID patch_Set;
+			LV2_URID patch_property;
+			LV2_URID patch_value;
+			LV2_URID model_Path;
 		};
 
 		URIs uris = {};

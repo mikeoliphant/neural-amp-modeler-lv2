@@ -67,7 +67,7 @@ static void cleanup(LV2_Handle instance) {
 static const void* extension_data(const char*) { return nullptr; }
 
 static const LV2_Descriptor descriptor = {
-	NAM::Plugin::URI.data(),
+	"http://github.com/mikeoliphant/neural-amp-modeler-lv2",
 	instantiate,
 	connect_port,
 	activate,

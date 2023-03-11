@@ -35,18 +35,34 @@
 
 	patch:writable <@NAM_LV2_ID@#model>;
 
+	# Control
+	lv2:port [
+		a atom:AtomPort, lv2:InputPort;
+		atom:bufferType atom:Sequence;
+		atom:supports patch:Message;
+		lv2:designation lv2:control;
+		lv2:index 0;
+		lv2:symbol "control";
+		lv2:name "Control"
+	], [
+		a atom:AtomPort, lv2:OutputPort;
+		atom:bufferType atom:Sequence;
+		atom:supports patch:Message;
+		lv2:designation lv2:control;
+		lv2:index 1;
+		lv2:symbol "notify";
+		lv2:name "Notify"
+	];
+
 	# Audio Ports
 	lv2:port [
 		a lv2:InputPort, lv2:AudioPort;
-		lv2:index 0;
+		lv2:index 2;
 		lv2:symbol "input";
 		lv2:name "Input";
 	], [
 		a lv2:OutputPort, lv2:AudioPort;
-		lv2:index 1;
+		lv2:index 3;
 		lv2:symbol "output";
 		lv2:name "Output";
-	];
-        state:state [
-                <@NAM_LV2_ID@#model> <click.wav> ;
-        ].
+	].

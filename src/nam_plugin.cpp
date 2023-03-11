@@ -4,6 +4,7 @@
 
 // Lv2
 #include <lv2/atom/util.h>
+#include <lv2/patch/patch.h>
 
 #include "nam_plugin.hpp"
 
@@ -15,8 +16,17 @@ namespace NAM {
 
 	void Plugin::map_uris(LV2_URID_Map* map) noexcept {
 		lv2_atom_forge_init(&atom_forge, map);
+
 		uris.atom_Object = map->map(map->handle, LV2_ATOM__Object);
 		uris.atom_Float = map->map(map->handle, LV2_ATOM__Float);
+		uris.atom_Int = map->map(map->handle, LV2_ATOM__Int);
+		uris.atom_Path = map->map(map->handle, LV2_ATOM__Path);
+		uris.atom_URID = map->map(map->handle, LV2_ATOM__URID);
+		uris.patch_Set = map->map(map->handle, LV2_PATCH__Set);
+		uris.patch_property = map->map(map->handle, LV2_PATCH__property);
+		uris.patch_value = map->map(map->handle, LV2_PATCH__value);
+
+		uris.model_Path = map->map(map->handle, MODEL_URI);
 	}
 
 	void Plugin::process(uint32_t n_samples) noexcept {
