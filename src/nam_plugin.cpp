@@ -11,7 +11,6 @@
 namespace NAM {
 	Plugin::Plugin(float rate)
 	{
-		namModel = get_dsp("C:\\Users\\oliph\\AppData\\Roaming\\GuitarSim\\NAM\\AC15Brkup.nam");
 	}
 
 	void Plugin::map_uris(LV2_URID_Map* map) noexcept {
@@ -30,7 +29,46 @@ namespace NAM {
 	}
 
 	void Plugin::process(uint32_t n_samples) noexcept {
-		namModel->process(ports.audio_in, ports.audio_out, n_samples, 1.0, 1.0, mNAMParams);
-		namModel->finalize_(n_samples);
+		if (ports.control) {
+			LV2_ATOM_SEQUENCE_FOREACH(ports.control, event) {
+				if (event->body.type == uris.atom_Object) {
+					const auto obj = reinterpret_cast<LV2_Atom_Object*>(&event->body);
+
+					if (obj->body.otype == uris.patch_Set)
+					{
+						const LV2_Atom* property = NULL;
+						const LV2_Atom* file_path = NULL;
+
+						lv2_atom_object_get(obj, uris.patch_property, &property, 0);
+
+						if (property && (property->type == uris.atom_URID))
+						{
+							if (((const LV2_Atom_URID*)property)->body == uris.model_Path)
+							{
+								lv2_atom_object_get(obj, uris.patch_value, &file_path, 0);
+
+								if (file_path && (file_path->size > 0))
+								{
+									namModel = get_dsp((const char*)LV2_ATOM_BODY_CONST(file_path));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (namModel == nullptr)
+		{
+			for (int i = 0; i < n_samples; i++)
+			{
+				ports.audio_out[i] = ports.audio_in[i];
+			}
+		}
+		else
+		{
+			namModel->process(ports.audio_in, ports.audio_out, n_samples, 1.0, 1.0, mNAMParams);
+			namModel->finalize_(n_samples);
+		}
 	}
 }

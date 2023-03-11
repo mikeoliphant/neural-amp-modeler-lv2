@@ -9,6 +9,7 @@
 @prefix param: <http://lv2plug.in/ns/ext/parameters#>.
 @prefix patch: <http://lv2plug.in/ns/ext/patch#>.
 @prefix state: <http://lv2plug.in/ns/ext/state#>.
+@prefix work:  <http://lv2plug.in/ns/ext/worker#>.
 
 <@NAM_LV2_ID@>
 	a doap:Project;
@@ -28,8 +29,9 @@
 	lv2:microVersion @PROJECT_VERSION_PATCH@;
 	doap:license <http://opensource.org/licenses/MIT>;
 
-	lv2:requiredFeature urid:map;
+	lv2:requiredFeature urid:map, work:schedule;
 	lv2:optionalFeature lv2:hardRTCapable;
+	lv2:extensionData work:interface;
 
 	rdfs:comment "An LV2 implementation of Neural Amp Modeler";
 
