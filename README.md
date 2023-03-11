@@ -2,8 +2,9 @@
 
 Bare-bones implementation of [Neural Amp Modeler](https://github.com/sdatkinson/neural-amp-modeler) (NAM) models in an LV2 plugin.
 
-There is no user interface. Currently the model path is hardcoded in the plugin code [here](https://github.com/mikeoliphant/neural-amp-modeler-lv2/blob/main/src/nam_plugin.cpp). Yes, this is suboptimal, but it suffices for testing for now. I haven't yet found a way in LV2 to allow the user to select
-a file without doing a custom UI (which I don't really want to do).
+There is no user interface. Setting the model to use requires that you LV2 host supports atom:Path parameters. Reaper does not. Carla and Ardour do.
+
+To get the intended behavior, you must run your audio host at the same sample rate the model was trained at (usually 48kHz) - no resampling is done by the plugin.
 
 ### Compiling
 
