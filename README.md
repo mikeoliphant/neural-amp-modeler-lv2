@@ -4,7 +4,9 @@ Bare-bones implementation of [Neural Amp Modeler](https://github.com/sdatkinson/
 
 There is no user interface. Setting the model to use requires that your LV2 host supports atom:Path parameters. Reaper does not. Carla and Ardour do.
 
-To get the intended behavior, you must run your audio host at the same sample rate the model was trained at (usually 48kHz) - no resampling is done by the plugin.
+To get the intended behavior, **you must run your audio host at the same sample rate the model was trained at** (usually 48kHz) - no resampling is done by the plugin.
+
+For amp-only models (the most typical), you will need to run an impulse reponse after this plugin to model the cabinet.
 
 ### Compiling
 
