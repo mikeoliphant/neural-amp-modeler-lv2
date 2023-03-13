@@ -2,10 +2,6 @@
 #include <cmath>
 #include <utility>
 
-// Lv2
-#include <lv2/atom/util.h>
-#include <lv2/patch/patch.h>
-
 #include "nam_plugin.h"
 
 namespace NAM {
@@ -13,7 +9,33 @@ namespace NAM {
 	{
 	}
 
-	void Plugin::map_uris(LV2_URID_Map* map) noexcept {
+	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
+	{
+		for (size_t i = 0; features[i]; ++i) {
+			if (std::string(features[i]->URI) == std::string(LV2_URID__map))
+				map = static_cast<LV2_URID_Map*>(features[i]->data);
+			else if (!strcmp(features[i]->URI, LV2_WORKER__schedule))
+				schedule = (LV2_Worker_Schedule*)features[i]->data;
+			else if (std::string(features[i]->URI) == std::string(LV2_LOG__log))
+				logger.log = static_cast<LV2_Log_Log*>(features[i]->data);
+		}
+
+		lv2_log_logger_set_map(&logger, map);
+
+		if (!map)
+		{
+			lv2_log_error(&logger, "Missing required feature: `%s`", LV2_URID__map);
+
+			return false;
+		}
+
+		if (!schedule)
+		{
+			lv2_log_error(&logger, "Missing required feature: `%s`", LV2_WORKER__schedule);
+
+			return false;
+		}
+
 		lv2_atom_forge_init(&atom_forge, map);
 
 		uris.atom_Object = map->map(map->handle, LV2_ATOM__Object);
@@ -26,6 +48,8 @@ namespace NAM {
 		uris.patch_value = map->map(map->handle, LV2_PATCH__value);
 
 		uris.model_Path = map->map(map->handle, MODEL_URI);
+
+		return true;
 	}
 
 	void Plugin::process(uint32_t n_samples) noexcept {
@@ -66,7 +90,7 @@ namespace NAM {
 
 		if (namModel == nullptr)
 		{
-			for (int i = 0; i < n_samples; i++)
+			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				ports.audio_out[i] = ports.audio_in[i];
 			}
