@@ -52,10 +52,71 @@ namespace NAM {
 		return true;
 	}
 
-	void Plugin::process(uint32_t n_samples) noexcept {
-		if (ports.control) {
-			LV2_ATOM_SEQUENCE_FOREACH(ports.control, event) {
-				if (event->body.type == uris.atom_Object) {
+	LV2_Worker_Status Plugin::work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
+		uint32_t size, const void* data)
+	{
+		switch (*((const uint32_t*)data))
+		{
+			case kWorkTypeLoad:
+				try
+				{
+					auto msg = reinterpret_cast<const LV2LoadModelMsg*>(data);
+
+					auto nam = static_cast<NAM::Plugin*>(instance);
+
+					//nam->currentModel = get_dsp("C://Users//oliph//AppData//Roaming//GuitarSim//NAM//JCM2000Crunch.nam");
+
+					nam->stagedModel = get_dsp(msg->path);
+
+					LV2WorkType response = kWorkTypeSwitch;
+
+					respond(handle, sizeof(response), &response);
+
+					return LV2_WORKER_SUCCESS;
+				}
+				catch (std::exception& e)
+				{
+				}
+
+				break;
+		}
+
+		return LV2_WORKER_ERR_UNKNOWN;
+	}
+
+	LV2_Worker_Status Plugin::work_response(LV2_Handle instance, uint32_t size,	const void* data)
+	{
+		switch (*((const uint32_t*)data))
+		{
+		case kWorkTypeSwitch:
+			try
+			{
+				auto nam = static_cast<NAM::Plugin*>(instance);
+
+				nam->currentModel = std::move(nam->stagedModel);
+				nam->stagedModel = nullptr;
+
+				return LV2_WORKER_SUCCESS;
+			}
+			catch (std::exception& e)
+			{
+			}
+
+			break;
+		}
+
+		return LV2_WORKER_ERR_UNKNOWN;
+	}
+
+
+	void Plugin::process(uint32_t n_samples) noexcept
+	{
+		if (ports.control)
+		{
+			LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
+			{
+				if (event->body.type == uris.atom_Object)
+				{
 					const auto obj = reinterpret_cast<LV2_Atom_Object*>(&event->body);
 
 					if (obj->body.otype == uris.patch_Set)
@@ -71,15 +132,13 @@ namespace NAM {
 							{
 								lv2_atom_object_get(obj, uris.patch_value, &file_path, 0);
 
-								if (file_path && (file_path->size > 0))
+								if (file_path && (file_path->size > 0) && (file_path->size < 1024))
 								{
-									try
-									{
-										namModel = get_dsp((const char*)LV2_ATOM_BODY_CONST(file_path));
-									}
-									catch (std::exception& e)
-									{
-									}
+									LV2LoadModelMsg msg = { kWorkTypeLoad, {} };
+
+									memcpy(msg.path, (const char*)LV2_ATOM_BODY_CONST(file_path), file_path->size);
+
+									schedule->schedule_work(schedule->handle, sizeof(msg), &msg);
 								}
 							}
 						}
@@ -88,7 +147,7 @@ namespace NAM {
 			}
 		}
 
-		if (namModel == nullptr)
+		if (currentModel == nullptr)
 		{
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
@@ -97,8 +156,8 @@ namespace NAM {
 		}
 		else
 		{
-			namModel->process(ports.audio_in, ports.audio_out, n_samples, 1.0, 1.0, mNAMParams);
-			namModel->finalize_(n_samples);
+			currentModel->process(ports.audio_in, ports.audio_out, n_samples, 1.0, 1.0, mNAMParams);
+			currentModel->finalize_(n_samples);
 		}
 	}
 }

@@ -23,6 +23,16 @@
 
 namespace NAM {
 
+	enum LV2WorkType {
+		kWorkTypeLoad,
+		kWorkTypeSwitch
+	};
+
+	struct LV2LoadModelMsg {
+		LV2WorkType type;
+		char path[1024];
+	};
+
 	class Plugin {
 	public:
 		struct Ports {
@@ -38,7 +48,8 @@ namespace NAM {
 		LV2_Log_Logger logger;
 		LV2_Worker_Schedule* schedule;
 
-		std::unique_ptr<::DSP> namModel;
+		std::unique_ptr<::DSP> currentModel;
+		std::unique_ptr<::DSP> stagedModel;
 
 		std::unordered_map<std::string, double> mNAMParams =
 		{
@@ -52,6 +63,11 @@ namespace NAM {
 
 		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
 		void process(uint32_t n_samples) noexcept;
+
+
+		static LV2_Worker_Status work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
+			uint32_t size, const void* data);
+		static LV2_Worker_Status work_response(LV2_Handle instance, uint32_t size, const void* data);
 
 	private:
 		struct URIs {

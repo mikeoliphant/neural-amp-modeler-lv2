@@ -12,11 +12,7 @@
 #include "nam_plugin.h"
 
 // LV2 Functions
-static LV2_Handle instantiate(
-	const LV2_Descriptor*,
-	double rate,
-	const char*,
-	const LV2_Feature* const* features
+static LV2_Handle instantiate(const LV2_Descriptor*, double rate, const char*, const LV2_Feature* const* features
 ) {
 	try
 	{
@@ -55,29 +51,9 @@ static void cleanup(LV2_Handle instance)
 	delete static_cast<NAM::Plugin*>(instance);
 }
 
-static LV2_Worker_Status
-work(LV2_Handle                  instance,
-	LV2_Worker_Respond_Function respond,
-	LV2_Worker_Respond_Handle   handle,
-	uint32_t                    size,
-	const void* data)
+static const void* extension_data(const char* uri)
 {
-
-	return LV2_WORKER_SUCCESS;
-}
-
-static LV2_Worker_Status
-work_response(LV2_Handle  instance,
-	uint32_t    size,
-	const void* data)
-{
-	return LV2_WORKER_SUCCESS;
-}
-
-static const void*
-extension_data(const char* uri)
-{
-	static const LV2_Worker_Interface  worker = { work, work_response, NULL };
+	static const LV2_Worker_Interface  worker = { NAM::Plugin::work, NAM::Plugin::work_response, NULL };
 
 	if (!strcmp(uri, LV2_WORKER__interface))
 		return &worker;
