@@ -1,7 +1,7 @@
 add_library(neural_amp_modeler MODULE
 	nam_lv2.cpp
 	nam_plugin.cpp
-	nam_plugin.hpp
+	nam_plugin.h
 	dsp.h
 	dsp.cpp
 	get_dsp.cpp

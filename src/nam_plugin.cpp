@@ -6,7 +6,7 @@
 #include <lv2/atom/util.h>
 #include <lv2/patch/patch.h>
 
-#include "nam_plugin.hpp"
+#include "nam_plugin.h"
 
 namespace NAM {
 	Plugin::Plugin(float rate)
@@ -49,7 +49,13 @@ namespace NAM {
 
 								if (file_path && (file_path->size > 0))
 								{
-									namModel = get_dsp((const char*)LV2_ATOM_BODY_CONST(file_path));
+									try
+									{
+										namModel = get_dsp((const char*)LV2_ATOM_BODY_CONST(file_path));
+									}
+									catch (std::exception& e)
+									{
+									}
 								}
 							}
 						}

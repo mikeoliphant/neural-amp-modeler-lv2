@@ -11,7 +11,7 @@
 #include <lv2/log/logger.h>
 #include <lv2/worker/worker.h>
 
-#include "nam_plugin.hpp"
+#include "nam_plugin.h"
 
 // LV2 Functions
 static LV2_Handle instantiate(
