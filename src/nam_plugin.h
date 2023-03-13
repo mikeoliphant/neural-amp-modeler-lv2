@@ -40,6 +40,8 @@ namespace NAM {
 			LV2_Atom_Sequence* notify;
 			const float* audio_in;
 			float* audio_out;
+			float* input_level;
+			float* output_level;
 		};
 
 		Ports ports = {};
@@ -51,11 +53,7 @@ namespace NAM {
 		std::unique_ptr<::DSP> currentModel;
 		std::unique_ptr<::DSP> stagedModel;
 
-		std::unordered_map<std::string, double> mNAMParams =
-		{
-			{"Input", 0.0},
-			{"Output", 0.0}
-		};
+		std::unordered_map<std::string, double> mNAMParams = {};
 
 
 		Plugin(float rate);

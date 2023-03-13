@@ -147,17 +147,26 @@ namespace NAM {
 			}
 		}
 
+		float inputLevel = pow(10, *(ports.input_level) * 0.05);
+		float outputLevel = pow(10, *(ports.output_level) * 0.05);
+
+		for (unsigned int i = 0; i < n_samples; i++)
+		{
+			ports.audio_out[i] = ports.audio_in[i] * inputLevel;
+		}
+
 		if (currentModel == nullptr)
 		{
-			for (unsigned int i = 0; i < n_samples; i++)
-			{
-				ports.audio_out[i] = ports.audio_in[i];
-			}
 		}
 		else
 		{
-			currentModel->process(ports.audio_in, ports.audio_out, n_samples, 1.0, 1.0, mNAMParams);
+			currentModel->process(ports.audio_out, ports.audio_out, n_samples, 1.0, 1.0, mNAMParams);
 			currentModel->finalize_(n_samples);
+		}
+
+		for (unsigned int i = 0; i < n_samples; i++)
+		{
+			ports.audio_out[i] *= outputLevel;
 		}
 	}
 }
