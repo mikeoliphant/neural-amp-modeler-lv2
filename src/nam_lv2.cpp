@@ -16,7 +16,7 @@ static LV2_Handle instantiate(const LV2_Descriptor*, double rate, const char*, c
 ) {
 	try
 	{
-		auto nam = std::make_unique<NAM::Plugin>(static_cast<float>(rate));
+		auto nam = std::make_unique<NAM::Plugin>();
 
 		if (nam->initialize(rate, features))
 		{

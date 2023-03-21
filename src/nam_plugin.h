@@ -56,7 +56,7 @@ namespace NAM {
 		std::unordered_map<std::string, double> mNAMParams = {};
 
 
-		Plugin(float rate);
+		Plugin();
 		~Plugin() = default;
 
 		bool initialize(double rate, const LV2_Feature* const* features) noexcept;

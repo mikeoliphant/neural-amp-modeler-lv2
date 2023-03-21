@@ -5,7 +5,7 @@
 #include "nam_plugin.h"
 
 namespace NAM {
-	Plugin::Plugin(float rate)
+	Plugin::Plugin()
 	{
 	}
 
