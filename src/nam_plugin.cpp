@@ -64,7 +64,11 @@ namespace NAM {
 
 					auto nam = static_cast<NAM::Plugin*>(instance);
 
-					//nam->currentModel = get_dsp("C://Users//oliph//AppData//Roaming//GuitarSim//NAM//JCM2000Crunch.nam");
+					// If we had a previous model, delete it
+					if (nam->deleteModel)
+					{
+						nam->deleteModel.reset();
+					}
 
 					nam->stagedModel = get_dsp(msg->path);
 
@@ -93,8 +97,9 @@ namespace NAM {
 			{
 				auto nam = static_cast<NAM::Plugin*>(instance);
 
-				nam->currentModel = std::move(nam->stagedModel);
-				nam->stagedModel = nullptr;
+				std::swap(nam->currentModel, nam->stagedModel);
+
+				nam->deleteModel = std::move(nam->stagedModel);
 
 				return LV2_WORKER_SUCCESS;
 			}
@@ -147,12 +152,15 @@ namespace NAM {
 			}
 		}
 
+		if (dblData.size() != n_samples)
+			dblData.resize(n_samples);
+
 		float inputLevel = pow(10, *(ports.input_level) * 0.05);
 		float outputLevel = pow(10, *(ports.output_level) * 0.05);
 
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
-			ports.audio_out[i] = ports.audio_in[i] * inputLevel;
+			dblData[i] = ports.audio_in[i] * inputLevel;
 		}
 
 		if (currentModel == nullptr)
@@ -160,13 +168,15 @@ namespace NAM {
 		}
 		else
 		{
-			currentModel->process(ports.audio_out, ports.audio_out, n_samples, 1.0, 1.0, mNAMParams);
+			double* data = dblData.data();
+
+			currentModel->process(&data, &data, 1, n_samples, 1.0, 1.0, mNAMParams);
 			currentModel->finalize_(n_samples);
 		}
 
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
-			ports.audio_out[i] *= outputLevel;
+			ports.audio_out[i] = dblData[i] * outputLevel;
 		}
 	}
 }

@@ -52,9 +52,9 @@ namespace NAM {
 
 		std::unique_ptr<::DSP> currentModel;
 		std::unique_ptr<::DSP> stagedModel;
+		std::unique_ptr<::DSP> deleteModel;
 
 		std::unordered_map<std::string, double> mNAMParams = {};
-
 
 		Plugin();
 		~Plugin() = default;
@@ -82,6 +82,8 @@ namespace NAM {
 
 		URIs uris = {};
 		LV2_Atom_Forge atom_forge = {};
+
+		std::vector<double> dblData;
 
 		float m_rate;
 	};
