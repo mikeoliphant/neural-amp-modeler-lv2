@@ -155,8 +155,8 @@ namespace NAM {
 		if (dblData.size() != n_samples)
 			dblData.resize(n_samples);
 
-		float inputLevel = pow(10, *(ports.input_level) * 0.05);
-		float outputLevel = pow(10, *(ports.output_level) * 0.05);
+		float inputLevel = powf(10, *(ports.input_level) * 0.05f);
+		float outputLevel = powf(10, *(ports.output_level) * 0.05f);
 
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
@@ -176,7 +176,7 @@ namespace NAM {
 
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
-			ports.audio_out[i] = dblData[i] * outputLevel;
+			ports.audio_out[i] = (float)(dblData[i] * outputLevel);
 		}
 	}
 }

@@ -9,6 +9,8 @@
 #include <lv2/urid/urid.h>
 #include <lv2/worker/worker.h>
 
+#include "architecture.hpp"
+
 #include "nam_plugin.h"
 
 // LV2 Functions
@@ -41,7 +43,15 @@ static void activate(LV2_Handle) {}
 
 static void run(LV2_Handle instance, uint32_t n_samples)
 {
+	// Disable floating point denormals
+	std::fenv_t fe_state;
+	std::feholdexcept(&fe_state);
+	disable_denormals();
+
 	static_cast<NAM::Plugin*>(instance)->process(n_samples);
+
+	// restore previous floating point state
+	std::feupdateenv(&fe_state);
 }
 
 static void deactivate(LV2_Handle) {}

@@ -23,6 +23,7 @@ include_directories(SYSTEM deps/eigen)
 include_directories(SYSTEM deps/lv2/include)
 include_directories(SYSTEM deps/NeuralAmpModelerCore/NAM)
 include_directories(SYSTEM deps/json)
+include_directories(SYSTEM deps/denormal)
 
 add_subdirectory(src)
 
