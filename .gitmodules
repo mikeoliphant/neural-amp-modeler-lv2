@@ -1,10 +1,10 @@
 [submodule "lv2"]
-	path = lv2
+	path = deps/lv2
 	url = https://github.com/lv2/lv2
 [submodule "eigen"]
-	path = eigen
+	path = deps/eigen
 	url = https://gitlab.com/libeigen/eigen
 [submodule "NeuralAmpModelerCore"]
-	path = NeuralAmpModelerCore
+	path = deps/NeuralAmpModelerCore
 	url = https://github.com/mikeoliphant/NeuralAmpModelerCore
 	branch = devel

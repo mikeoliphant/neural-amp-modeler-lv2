@@ -19,10 +19,10 @@ endif()
 
 set(NAM_LV2_ID http://github.com/mikeoliphant/neural-amp-modeler-lv2)
 
-include_directories(SYSTEM eigen)
-include_directories(SYSTEM lv2/include)
-include_directories(SYSTEM NeuralAmpModelerCore/NAM)
-include_directories(SYSTEM json)
+include_directories(SYSTEM deps/eigen)
+include_directories(SYSTEM deps/lv2/include)
+include_directories(SYSTEM deps/NeuralAmpModelerCore/NAM)
+include_directories(SYSTEM deps/json)
 
 add_subdirectory(src)
 

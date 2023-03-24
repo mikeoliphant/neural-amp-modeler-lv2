@@ -2,17 +2,17 @@ add_library(neural_amp_modeler MODULE
 	nam_lv2.cpp
 	nam_plugin.cpp
 	nam_plugin.h
-	../NeuralAmpModelerCore/NAM/activations.h
-	../NeuralAmpModelerCore/NAM/version.h
-	../NeuralAmpModelerCore/NAM/lstm.h
-	../NeuralAmpModelerCore/NAM/lstm.cpp
-	../NeuralAmpModelerCore/NAM/dsp.h
-	../NeuralAmpModelerCore/NAM/dsp.cpp
-	../NeuralAmpModelerCore/NAM/get_dsp.cpp
-	../NeuralAmpModelerCore/NAM/util.cpp
-	../NeuralAmpModelerCore/NAM/util.h
-	../NeuralAmpModelerCore/NAM/wavenet.cpp
-	../NeuralAmpModelerCore/NAM/wavenet.h
+	../deps/NeuralAmpModelerCore/NAM/activations.h
+	../deps/NeuralAmpModelerCore/NAM/version.h
+	../deps/NeuralAmpModelerCore/NAM/lstm.h
+	../deps/NeuralAmpModelerCore/NAM/lstm.cpp
+	../deps/NeuralAmpModelerCore/NAM/dsp.h
+	../deps/NeuralAmpModelerCore/NAM/dsp.cpp
+	../deps/NeuralAmpModelerCore/NAM/get_dsp.cpp
+	../deps/NeuralAmpModelerCore/NAM/util.cpp
+	../deps/NeuralAmpModelerCore/NAM/util.h
+	../deps/NeuralAmpModelerCore/NAM/wavenet.cpp
+	../deps/NeuralAmpModelerCore/NAM/wavenet.h
 )
 
 target_compile_features(neural_amp_modeler PUBLIC cxx_std_17)
