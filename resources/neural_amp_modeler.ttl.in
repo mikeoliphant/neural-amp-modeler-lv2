@@ -31,7 +31,7 @@
 
 	lv2:requiredFeature urid:map, work:schedule;
 	lv2:optionalFeature lv2:hardRTCapable;
-	lv2:extensionData work:interface;
+	lv2:extensionData work:interface, state:interface;
 
 	rdfs:comment "An LV2 implementation of Neural Amp Modeler";
 
@@ -88,4 +88,7 @@
 		lv2:minimum -20.0;
 		lv2:maximum 20.0;
 		units:unit units:db;
-	].
+	];
+    state:state [
+            <@NAM_LV2_ID@#model> <click.wav> ;
+    ].
