@@ -12,7 +12,9 @@ set(NAM_SOURCES	../deps/NeuralAmpModelerCore/NAM/activations.h
 	../deps/NeuralAmpModelerCore/NAM/util.cpp
 	../deps/NeuralAmpModelerCore/NAM/util.h
 	../deps/NeuralAmpModelerCore/NAM/wavenet.cpp
-	../deps/NeuralAmpModelerCore/NAM/wavenet.h)
+	../deps/NeuralAmpModelerCore/NAM/wavenet.h
+	../deps/NeuralAmpModelerCore/NAM/convnet.cpp
+	../deps/NeuralAmpModelerCore/NAM/convnet.h)
 
 add_library(neural_amp_modeler MODULE ${SOURCES} ${NAM_SOURCES})
 
