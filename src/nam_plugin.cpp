@@ -212,8 +212,6 @@ namespace NAM {
 		store(handle, nam->uris.model_Path, apath, strlen(apath) + 1, nam->uris.atom_Path,
 			LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
 
-		free(apath);
-
 		return LV2_STATE_SUCCESS;
 	}
 
@@ -250,7 +248,6 @@ namespace NAM {
 		memcpy(msg.path, path, size);
 		nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
 
-		free(path);
 		return LV2_STATE_SUCCESS;
 	}
 
