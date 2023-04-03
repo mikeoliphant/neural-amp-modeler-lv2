@@ -3,10 +3,13 @@
 #include <utility>
 
 #include "nam_plugin.h"
+#include "activations.h"
 
 namespace NAM {
 	Plugin::Plugin()
 	{
+		// Turn on fast tanh approximation
+		activations::Activation::enable_fast_tanh();
 	}
 
 	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept

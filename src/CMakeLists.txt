@@ -3,6 +3,7 @@ set(SOURCES nam_lv2.cpp
 	nam_plugin.h)
 
 set(NAM_SOURCES	../deps/NeuralAmpModelerCore/NAM/activations.h
+	../deps/NeuralAmpModelerCore/NAM/activations.cpp
 	../deps/NeuralAmpModelerCore/NAM/version.h
 	../deps/NeuralAmpModelerCore/NAM/lstm.h
 	../deps/NeuralAmpModelerCore/NAM/lstm.cpp
