@@ -14,12 +14,12 @@ namespace NAM {
 		for (size_t i = 0; features[i]; ++i) {
 			if (std::string(features[i]->URI) == std::string(LV2_URID__map))
 				map = static_cast<LV2_URID_Map*>(features[i]->data);
-			else if (!strcmp(features[i]->URI, LV2_WORKER__schedule))
-				schedule = (LV2_Worker_Schedule*)features[i]->data;
+			else if (std::string(features[i]->URI) == std::string(LV2_WORKER__schedule))
+				schedule = static_cast<LV2_Worker_Schedule*>(features[i]->data);
 			else if (std::string(features[i]->URI) == std::string(LV2_LOG__log))
 				logger.log = static_cast<LV2_Log_Log*>(features[i]->data);
 		}
-
+	
 		lv2_log_logger_set_map(&logger, map);
 
 		if (!map)
@@ -44,6 +44,7 @@ namespace NAM {
 		uris.atom_Path = map->map(map->handle, LV2_ATOM__Path);
 		uris.atom_URID = map->map(map->handle, LV2_ATOM__URID);
 		uris.patch_Set = map->map(map->handle, LV2_PATCH__Set);
+		uris.patch_Get = map->map(map->handle, LV2_PATCH__Get);
 		uris.patch_property = map->map(map->handle, LV2_PATCH__property);
 		uris.patch_value = map->map(map->handle, LV2_PATCH__value);
 
@@ -55,6 +56,8 @@ namespace NAM {
 	LV2_Worker_Status Plugin::work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
 		uint32_t size, const void* data)
 	{
+		auto atom = static_cast<const LV2_Atom*>(data);
+		auto nam = static_cast<NAM::Plugin*>(instance);
 		switch (*((const uint32_t*)data))
 		{
 			case kWorkTypeLoad:
@@ -70,7 +73,9 @@ namespace NAM {
 						nam->deleteModel.reset();
 					}
 
+					lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
 					nam->stagedModel = get_dsp(msg->path);
+					nam->stagedModelPath = msg->path;
 
 					LV2WorkType response = kWorkTypeSwitch;
 
@@ -98,8 +103,11 @@ namespace NAM {
 				auto nam = static_cast<NAM::Plugin*>(instance);
 
 				std::swap(nam->currentModel, nam->stagedModel);
+				nam->currentModelPath = nam->stagedModelPath;
 
 				nam->deleteModel = std::move(nam->stagedModel);
+
+				nam->write_set_patch(nam->currentModelPath);
 
 				return LV2_WORKER_SUCCESS;
 			}
@@ -123,6 +131,10 @@ namespace NAM {
 				if (event->body.type == uris.atom_Object)
 				{
 					const auto obj = reinterpret_cast<LV2_Atom_Object*>(&event->body);
+					if (obj->body.otype == uris.patch_Get) {
+						lv2_atom_forge_frame_time(&atom_forge, 0);
+						write_set_patch(currentModelPath);
+					}
 
 					if (obj->body.otype == uris.patch_Set)
 					{
@@ -130,6 +142,7 @@ namespace NAM {
 						const LV2_Atom* file_path = NULL;
 
 						lv2_atom_object_get(obj, uris.patch_property, &property, 0);
+
 
 						if (property && (property->type == uris.atom_URID))
 						{
@@ -178,5 +191,78 @@ namespace NAM {
 		{
 			ports.audio_out[i] = (float)(dblData[i] * outputLevel);
 		}
+	}
+
+	LV2_State_Status Plugin::save(LV2_Handle instance, LV2_State_Store_Function store, LV2_State_Handle handle, 
+		uint32_t flags, const LV2_Feature* const* features)
+	{
+		auto nam = static_cast<NAM::Plugin*>(instance);
+		
+		lv2_log_trace(&nam->logger, "Saving state\n");
+
+		if (!nam->currentModel) {
+			return LV2_STATE_SUCCESS;
+		}
+
+		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
+
+		// Map absolute sample path to an abstract state path
+		char* apath = map_path->abstract_path(map_path->handle, nam->currentModelPath.c_str());
+		
+		store(handle, nam->uris.model_Path, apath, strlen(apath) + 1, nam->uris.atom_Path,
+			LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
+
+		return LV2_STATE_SUCCESS;
+	}
+
+	LV2_State_Status Plugin::restore(LV2_Handle instance, LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, 
+		uint32_t flags, const LV2_Feature* const* features)
+	{
+		auto nam = static_cast<NAM::Plugin*>(instance);
+
+		// Get model_Path from state
+		size_t      size     = 0;
+		uint32_t    type     = 0;
+		uint32_t    valflags = 0;
+		const void* value = retrieve(handle, nam->uris.model_Path, &size, &type, &valflags);
+
+		lv2_log_trace(&nam->logger, "Restoring model '%s'\n", value);
+
+		if (!value) {
+			lv2_log_error(&nam->logger, "Missing model_Path\n");
+			return LV2_STATE_ERR_NO_PROPERTY;
+		}
+
+		if (type != nam->uris.atom_Path) {
+			lv2_log_error(&nam->logger, "Non-path model_Path\n");
+			return LV2_STATE_ERR_BAD_TYPE;
+		}
+
+		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
+		// Map abstract state path to absolute path
+		char* path = map_path->absolute_path(map_path->handle, (const char *)value);
+
+		// Schedule model to be loaded by the provided worker
+		NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
+
+		memcpy(msg.path, path, size);
+		nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
+
+		return LV2_STATE_SUCCESS;
+	}
+
+	LV2_Atom_Forge_Ref Plugin::write_set_patch( std::string filename)
+	{
+		LV2_Atom_Forge_Frame frame;
+		LV2_Atom_Forge_Ref   set =
+		lv2_atom_forge_object(&atom_forge, &frame, 0, uris.patch_Set);
+
+		lv2_atom_forge_key(&atom_forge, uris.patch_property);
+		lv2_atom_forge_urid(&atom_forge, uris.model_Path);
+		lv2_atom_forge_key(&atom_forge, uris.patch_value);
+		lv2_atom_forge_path(&atom_forge, filename.c_str(), filename.length());
+
+		lv2_atom_forge_pop(&atom_forge, &frame);
+		return set;
 	}
 }
