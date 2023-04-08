@@ -96,9 +96,9 @@ inline void disable_denormals() noexcept {
 		#endif
 	#elif defined(ARCH_ARM)
 		#if defined __has_builtin
-		#if __has_builtin(__builtin_arm_set_fpscr) && __has_builtin(__builtin_arm_get_fpscr)
-			__builtin_arm_set_fpscr(__builtin_arm_get_fpscr() | (1 << 24));
-		#endif
+			#if __has_builtin(__builtin_arm_set_fpscr) && __has_builtin(__builtin_arm_get_fpscr)
+				__builtin_arm_set_fpscr(__builtin_arm_get_fpscr() | (1 << 24));
+			#endif
 		#endif
 	#endif
 

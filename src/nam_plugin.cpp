@@ -200,7 +200,7 @@ namespace NAM {
 		uint32_t flags, const LV2_Feature* const* features)
 	{
 		auto nam = static_cast<NAM::Plugin*>(instance);
-		
+
 		lv2_log_trace(&nam->logger, "Saving state\n");
 
 		if (!nam->currentModel) {
@@ -211,10 +211,13 @@ namespace NAM {
 
 		// Map absolute sample path to an abstract state path
 		char* apath = map_path->abstract_path(map_path->handle, nam->currentModelPath.c_str());
-		
+
 		store(handle, nam->uris.model_Path, apath, strlen(apath) + 1, nam->uris.atom_Path,
 			LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
 
+#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
+		free(apath);
+#endif
 		return LV2_STATE_SUCCESS;
 	}
 
@@ -250,6 +253,10 @@ namespace NAM {
 
 		memcpy(msg.path, path, size);
 		nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
+
+#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
+		free(path);
+#endif
 
 		return LV2_STATE_SUCCESS;
 	}
