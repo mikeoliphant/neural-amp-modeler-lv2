@@ -79,6 +79,9 @@ namespace NAM {
 					nam->stagedModel = get_dsp(msg->path);
 					nam->stagedModelPath = msg->path;
 
+					// Enable model loudness normalization
+					nam->stagedModel->SetNormalize(true);
+
 					LV2WorkType response = kWorkTypeSwitch;
 
 					respond(handle, sizeof(response), &response);
