@@ -64,12 +64,11 @@ namespace NAM {
 		switch (*((const uint32_t*)data))
 		{
 			case kWorkTypeLoad:
+				auto msg = reinterpret_cast<const LV2LoadModelMsg*>(data);
+				auto nam = static_cast<NAM::Plugin*>(instance);
+
 				try
 				{
-					auto msg = reinterpret_cast<const LV2LoadModelMsg*>(data);
-
-					auto nam = static_cast<NAM::Plugin*>(instance);
-
 					// If we had a previous model, delete it
 					if (nam->deleteModel)
 					{
@@ -88,6 +87,7 @@ namespace NAM {
 				}
 				catch (std::exception& e)
 				{
+					lv2_log_error(&nam->logger, "Unable to load model from: '%s'\n", msg->path);
 				}
 
 				break;
