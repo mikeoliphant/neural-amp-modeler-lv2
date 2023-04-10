@@ -219,9 +219,10 @@ namespace NAM {
 		store(handle, nam->uris.model_Path, apath, strlen(apath) + 1, nam->uris.atom_Path,
 			LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
 
-#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
-		free(apath);
-#endif
+		LV2_State_Free_Path* free_path = (LV2_State_Free_Path *)lv2_features_data(features, LV2_STATE__freePath);
+
+		free_path->free_path(free_path->handle, apath);
+
 		return LV2_STATE_SUCCESS;
 	}
 
@@ -271,9 +272,9 @@ namespace NAM {
 			result = LV2_STATE_ERR_UNKNOWN;
 		}
 
-#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
-		free(path);
-#endif
+		LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
+
+		free_path->free_path(free_path->handle, path);
 
 		return result;
 	}
