@@ -76,6 +76,7 @@ namespace NAM {
 					}
 
 					lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
+
 					nam->stagedModel = get_dsp(msg->path);
 					nam->stagedModelPath = msg->path;
 
@@ -251,17 +252,30 @@ namespace NAM {
 		// Map abstract state path to absolute path
 		char* path = map_path->absolute_path(map_path->handle, (const char *)value);
 
-		// Schedule model to be loaded by the provided worker
-		NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
+		size_t pathLen = strlen(path);
 
-		memcpy(msg.path, path, size);
-		nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
+		LV2_State_Status result = LV2_STATE_SUCCESS;
+
+		if (pathLen < 1024)
+		{
+			// Schedule model to be loaded by the provided worker
+			NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
+
+			memcpy(msg.path, path, pathLen);
+			nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
+		}
+		else
+		{
+			lv2_log_error(&nam->logger, "Model path is too long (max 1024 chars)\n");
+
+			result = LV2_STATE_ERR_UNKNOWN;
+		}
 
 #ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
 		free(path);
 #endif
 
-		return LV2_STATE_SUCCESS;
+		return result;
 	}
 
 	LV2_Atom_Forge_Ref Plugin::write_set_patch( std::string filename)
