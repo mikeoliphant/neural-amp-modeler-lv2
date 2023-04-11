@@ -3,27 +3,21 @@ name: Build
 on:
   workflow_dispatch
 
-defaults:
-  run:
-    shell: bash
-
+env:
+  BUILD_TYPE: Release
+  
 jobs:
-  steps:
-  - uses: actions/checkout@v3.3.0
-    with:
-      path: neural-amp-modeler-lv2
-      submodules: recursive
-
   build-ubuntu:
     name: Build Ubuntu
     runs-on: ubuntu-latest
-
     steps:
+    - uses: actions/checkout@v3.3.0
+    
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
       env:
         CXX: clang++
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        cmake --build . --config Release -j4
+        cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+        cmake --build . --config ${BUILD_TYPE} -j4
 
