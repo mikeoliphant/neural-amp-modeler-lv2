@@ -18,6 +18,6 @@ jobs:
       env:
         CXX: clang++
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-        cmake --build . --config ${BUILD_TYPE} -j4
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake --build . --config $BUILD_TYPE -j4
 
