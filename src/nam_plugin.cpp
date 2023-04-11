@@ -213,6 +213,13 @@ namespace NAM {
 
 		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
 
+		if (map_path == nullptr)
+		{
+			lv2_log_error(&nam->logger, "LV2_STATE__mapPath unsupported by host\n");
+
+			return LV2_STATE_ERR_NO_FEATURE;
+		}
+
 		// Map absolute sample path to an abstract state path
 		char* apath = map_path->abstract_path(map_path->handle, nam->currentModelPath.c_str());
 
@@ -221,7 +228,16 @@ namespace NAM {
 
 		LV2_State_Free_Path* free_path = (LV2_State_Free_Path *)lv2_features_data(features, LV2_STATE__freePath);
 
-		free_path->free_path(free_path->handle, apath);
+		if (free_path != nullptr)
+		{
+			free_path->free_path(free_path->handle, apath);
+		}
+		else
+		{
+#ifndef _WIN32	// Can't free library allocated memory on Windows
+			free(apath);
+#endif
+		}
 
 		return LV2_STATE_SUCCESS;
 	}
@@ -250,6 +266,14 @@ namespace NAM {
 		}
 
 		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
+
+		if (map_path == nullptr)
+		{
+			lv2_log_error(&nam->logger, "LV2_STATE__mapPath unsupported by host\n");
+
+			return LV2_STATE_ERR_NO_FEATURE;
+		}
+
 		// Map abstract state path to absolute path
 		char* path = map_path->absolute_path(map_path->handle, (const char *)value);
 
@@ -274,7 +298,16 @@ namespace NAM {
 
 		LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
 
-		free_path->free_path(free_path->handle, path);
+		if (free_path != nullptr)
+		{
+			free_path->free_path(free_path->handle, path);
+		}
+		else
+		{
+#ifndef _WIN32	// Can't free library allocated memory on Windows
+			free(path);
+#endif
+		}
 
 		return result;
 	}
