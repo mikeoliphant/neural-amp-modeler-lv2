@@ -17,6 +17,7 @@
 #include <lv2/patch/patch.h>
 #include <lv2/worker/worker.h>
 #include <lv2/state/state.h>
+#include <lv2/units/units.h>
 
 #include "dsp.h"
 
@@ -55,6 +56,7 @@ namespace NAM {
 		std::unique_ptr<::DSP> currentModel;
 		std::unique_ptr<::DSP> stagedModel;
 		std::unique_ptr<::DSP> deleteModel;
+		bool stateChanged = false;
 
 		std::string currentModelPath;
 		std::string stagedModelPath;
@@ -67,7 +69,8 @@ namespace NAM {
 		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
 		void process(uint32_t n_samples) noexcept;
 		
-		LV2_Atom_Forge_Ref write_set_patch(std::string filename);
+		void write_set_patch(std::string filename);
+		void write_state_changed();
 
 		static LV2_Worker_Status work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
 			uint32_t size, const void* data);
@@ -79,6 +82,8 @@ namespace NAM {
 			const LV2_Feature* const* features);
 
 	private:
+		static constexpr size_t MAX_FILE_NAME = 1024;
+
 		struct URIs {
 			LV2_URID atom_Object;
 			LV2_URID atom_Float;
@@ -89,12 +94,15 @@ namespace NAM {
 			LV2_URID patch_Get;
 			LV2_URID patch_property;
 			LV2_URID patch_value;
+			LV2_URID state_StateChanged;
+			LV2_URID units_frame;
 			LV2_URID model_Path;
 		};
 
 		URIs uris = {};
 
 		LV2_Atom_Forge atom_forge = {};
+		LV2_Atom_Forge_Frame sequence_frame;
 
 		std::vector<double> dblData;
 
