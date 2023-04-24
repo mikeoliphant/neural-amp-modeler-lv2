@@ -45,8 +45,10 @@ if (MSVC)
 	)
 else()
 	target_compile_options(neural_amp_modeler PRIVATE
-		-Wall -Wextra -Wpedantic -Wstrict-aliasing -Wunreachable-code -Weffc++ -Wno-unused-parameter
-		"$<$<CONFIG:DEBUG>:-Og;-ggdb;-Werror>"
+		-Wall 
+		# -Wpedantic -Wextra -Wstrict-aliasing -Wunreachable-code -Weffc++ -Wno-unused-parameter
+		"$<$<CONFIG:DEBUG>:-Og;-ggdb>"
+		"$<$<CONFIG:RELWITHDEBINFO>:-Ofast>"
 		"$<$<CONFIG:RELEASE>:-Ofast>"
 	)
 endif()

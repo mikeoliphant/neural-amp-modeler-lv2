@@ -4,12 +4,14 @@
 
 #include "nam_plugin.h"
 #include "activations.h"
+#include <cassert>
 
 namespace NAM {
 	Plugin::Plugin()
 	{
 		// Turn on fast tanh approximation
 		activations::Activation::enable_fast_tanh();
+		currentModelPath.reserve(MAX_FILE_NAME+1); // prevent allocations on the audio thread.
 	}
 
 	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
@@ -50,6 +52,8 @@ namespace NAM {
 		uris.patch_Get = map->map(map->handle, LV2_PATCH__Get);
 		uris.patch_property = map->map(map->handle, LV2_PATCH__property);
 		uris.patch_value = map->map(map->handle, LV2_PATCH__value);
+		uris.units_frame = map->map(map->handle, LV2_UNITS__frame);
+		uris.state_StateChanged = map->map(map->handle, LV2_STATE__StateChanged);
 
 		uris.model_Path = map->map(map->handle, MODEL_URI);
 
@@ -59,8 +63,6 @@ namespace NAM {
 	LV2_Worker_Status Plugin::work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
 		uint32_t size, const void* data)
 	{
-		auto atom = static_cast<const LV2_Atom*>(data);
-		auto nam = static_cast<NAM::Plugin*>(instance);
 		switch (*((const uint32_t*)data))
 		{
 			case kWorkTypeLoad:
@@ -75,16 +77,22 @@ namespace NAM {
 						nam->deleteModel.reset();
 					}
 
-					lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
+					if (strlen(msg->path) == 0)
+					{	
+						// avoid logging an error on an empty path.
+						// but do clear the model.
+						nam->stagedModel = nullptr; 
+						nam->stagedModelPath = msg->path;
+					} else 
+					{
+						lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
+						nam->stagedModel = get_dsp(msg->path);
+						nam->stagedModelPath = msg->path;
 
-					nam->stagedModel = get_dsp(msg->path);
-					nam->stagedModelPath = msg->path;
-
-					// Enable model loudness normalization
-					nam->stagedModel->SetNormalize(true);
-
+						// Enable model loudness normalization
+						nam->stagedModel->SetNormalize(true);
+					}
 					LV2WorkType response = kWorkTypeSwitch;
-
 					respond(handle, sizeof(response), &response);
 
 					return LV2_WORKER_SUCCESS;
@@ -111,6 +119,8 @@ namespace NAM {
 
 				std::swap(nam->currentModel, nam->stagedModel);
 				nam->currentModelPath = nam->stagedModelPath;
+				assert(nam->currentModelPath.capacity() == MAX_FILE_NAME+1);
+				nam->stateChanged = true;
 
 				nam->deleteModel = std::move(nam->stagedModel);
 
@@ -131,40 +141,41 @@ namespace NAM {
 
 	void Plugin::process(uint32_t n_samples) noexcept
 	{
-		if (ports.control)
+
+		lv2_atom_forge_set_buffer(&atom_forge,(uint8_t*)ports.notify,ports.notify->atom.size);
+		lv2_atom_forge_sequence_head(&atom_forge,&sequence_frame,uris.units_frame);
+
+		LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
 		{
-			LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
+			if (event->body.type == uris.atom_Object)
 			{
-				if (event->body.type == uris.atom_Object)
+				const auto obj = reinterpret_cast<LV2_Atom_Object*>(&event->body);
+				if (obj->body.otype == uris.patch_Get) {
+					lv2_atom_forge_frame_time(&atom_forge, 0);
+					write_set_patch(currentModelPath);
+				}
+
+				if (obj->body.otype == uris.patch_Set)
 				{
-					const auto obj = reinterpret_cast<LV2_Atom_Object*>(&event->body);
-					if (obj->body.otype == uris.patch_Get) {
-						lv2_atom_forge_frame_time(&atom_forge, 0);
-						write_set_patch(currentModelPath);
-					}
+					const LV2_Atom* property = NULL;
+					const LV2_Atom* file_path = NULL;
 
-					if (obj->body.otype == uris.patch_Set)
+					lv2_atom_object_get(obj, uris.patch_property, &property, 0);
+
+
+					if (property && (property->type == uris.atom_URID))
 					{
-						const LV2_Atom* property = NULL;
-						const LV2_Atom* file_path = NULL;
-
-						lv2_atom_object_get(obj, uris.patch_property, &property, 0);
-
-
-						if (property && (property->type == uris.atom_URID))
+						if (((const LV2_Atom_URID*)property)->body == uris.model_Path)
 						{
-							if (((const LV2_Atom_URID*)property)->body == uris.model_Path)
+							lv2_atom_object_get(obj, uris.patch_value, &file_path, 0);
+
+							if (file_path && (file_path->size > 0) && (file_path->size < 1024))
 							{
-								lv2_atom_object_get(obj, uris.patch_value, &file_path, 0);
+								LV2LoadModelMsg msg = { kWorkTypeLoad, {} };
 
-								if (file_path && (file_path->size > 0) && (file_path->size < 1024))
-								{
-									LV2LoadModelMsg msg = { kWorkTypeLoad, {} };
+								memcpy(msg.path, (const char*)LV2_ATOM_BODY_CONST(file_path), file_path->size);
 
-									memcpy(msg.path, (const char*)LV2_ATOM_BODY_CONST(file_path), file_path->size);
-
-									schedule->schedule_work(schedule->handle, sizeof(msg), &msg);
-								}
+								schedule->schedule_work(schedule->handle, sizeof(msg), &msg);
 							}
 						}
 					}
@@ -198,6 +209,13 @@ namespace NAM {
 		{
 			ports.audio_out[i] = (float)(dblData[i] * outputLevel);
 		}
+		if (stateChanged)
+		{
+			stateChanged = false;
+			lv2_atom_forge_frame_time(&atom_forge, 0);
+			write_state_changed();
+		}
+		lv2_atom_forge_pop(&atom_forge,&sequence_frame);
 	}
 
 	LV2_State_Status Plugin::save(LV2_Handle instance, LV2_State_Store_Function store, LV2_State_Handle handle, 
@@ -253,7 +271,7 @@ namespace NAM {
 		uint32_t    valflags = 0;
 		const void* value = retrieve(handle, nam->uris.model_Path, &size, &type, &valflags);
 
-		lv2_log_trace(&nam->logger, "Restoring model '%s'\n", value);
+		lv2_log_trace(&nam->logger, "Restoring model '%s'\n", (const char*)value);
 
 		if (!value) {
 			lv2_log_error(&nam->logger, "Missing model_Path\n");
@@ -312,10 +330,10 @@ namespace NAM {
 		return result;
 	}
 
-	LV2_Atom_Forge_Ref Plugin::write_set_patch( std::string filename)
+	void Plugin::write_set_patch( std::string filename)
 	{
 		LV2_Atom_Forge_Frame frame;
-		LV2_Atom_Forge_Ref   set =
+
 		lv2_atom_forge_object(&atom_forge, &frame, 0, uris.patch_Set);
 
 		lv2_atom_forge_key(&atom_forge, uris.patch_property);
@@ -324,6 +342,15 @@ namespace NAM {
 		lv2_atom_forge_path(&atom_forge, filename.c_str(), filename.length());
 
 		lv2_atom_forge_pop(&atom_forge, &frame);
-		return set;
 	}
+
+	void Plugin::write_state_changed()
+	{
+		LV2_Atom_Forge_Frame frame;
+
+		lv2_atom_forge_object(&atom_forge, &frame, 0, uris.state_StateChanged);
+			/* object with no properties */
+		lv2_atom_forge_pop(&atom_forge, &frame);
+	}
+
 }

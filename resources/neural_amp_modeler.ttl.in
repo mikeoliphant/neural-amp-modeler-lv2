@@ -33,7 +33,13 @@
 	lv2:optionalFeature lv2:hardRTCapable;
 	lv2:extensionData work:interface, state:interface;
 
-	rdfs:comment "An LV2 implementation of Neural Amp Modeler";
+	rdfs:comment """
+An LV2 implementation of Neural Amp Modeler.
+
+NAM accepts Neural Amp Modeler .nam files.
+
+A large collection of .nam files is available at https://tonehunt.org/
+""";
 
 	patch:writable <@NAM_LV2_ID@#model>;
 
