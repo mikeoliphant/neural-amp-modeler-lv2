@@ -10,6 +10,7 @@
 @prefix patch: <http://lv2plug.in/ns/ext/patch#>.
 @prefix state: <http://lv2plug.in/ns/ext/state#>.
 @prefix work:  <http://lv2plug.in/ns/ext/worker#>.
+@prefix mod: <http://moddevices.com/ns/mod#>.
 
 <@NAM_LV2_ID@>
 	a doap:Project;
@@ -18,7 +19,8 @@
 
 <@NAM_LV2_ID@#model>
         a lv2:Parameter;
-        rdfs:label "Model";
+	mod:fileTypes "nammodel";
+        rdfs:label "Neural Model";
         rdfs:range atom:Path.
 
 <@NAM_LV2_ID@>
