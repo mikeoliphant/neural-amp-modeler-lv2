@@ -22,4 +22,5 @@ jobs:
       run: |
         cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
         cmake --build . --config $BUILD_TYPE -j4
+        cpack
 
