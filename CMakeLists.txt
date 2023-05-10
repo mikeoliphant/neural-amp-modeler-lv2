@@ -39,7 +39,6 @@ configure_file(resources/neural_amp_modeler.ttl.in neural_amp_modeler.lv2/neural
 
 install (DIRECTORY neural_amp_modeler.lv2} 
        DESTINATION /usr/lib/lv2
-	   DEPENDS copy_binaries
 )
 
 set(CPACK_GENERATOR "DEB")
