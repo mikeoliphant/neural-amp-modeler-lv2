@@ -1,5 +1,6 @@
 @prefix atom:  <http://lv2plug.in/ns/ext/atom#>.
 @prefix doap:  <http://usefulinc.com/ns/doap#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
 @prefix lv2:   <http://lv2plug.in/ns/lv2core#>.
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
@@ -12,11 +13,6 @@
 @prefix work:  <http://lv2plug.in/ns/ext/worker#>.
 @prefix mod: <http://moddevices.com/ns/mod#>.
 
-<@NAM_LV2_ID@>
-	a doap:Project;
-	doap:maintainer <http://github.com/mikeoliphant>;
-	doap:name "Neural Amp Modeler".
-
 <@NAM_LV2_ID@#model>
         a lv2:Parameter;
 	mod:fileTypes "nammodel";
@@ -24,12 +20,17 @@
         rdfs:range atom:Path.
 
 <@NAM_LV2_ID@>
-	a lv2:Plugin, lv2:AmplifierPlugin;
+	a lv2:Plugin, lv2:SimulatorPlugin;
 	doap:name "Neural Amp Modeler";
 	lv2:project <@NAM_LV2_ID@>;
 	lv2:minorVersion @PROJECT_VERSION_MINOR@;
 	lv2:microVersion @PROJECT_VERSION_PATCH@;
-	doap:license <http://opensource.org/licenses/MIT>;
+	doap:license <http://opensource.org/licenses/gpl-3-0>;
+
+	doap:maintainer [
+		foaf:name "Mike Oliphant";
+		foaf:homepage <http://github.com/mikeoliphant>;
+	];
 
 	lv2:requiredFeature urid:map, work:schedule;
 	lv2:optionalFeature lv2:hardRTCapable;
