@@ -6,6 +6,8 @@
 #include "activations.h"
 #include <cassert>
 
+#define SMOOTH_EPSILON .0001f
+
 namespace NAM {
 	Plugin::Plugin()
 	{
@@ -186,12 +188,27 @@ namespace NAM {
 		if (dblData.size() != n_samples)
 			dblData.resize(n_samples);
 
-		for (unsigned int i = 0; i < n_samples; i++)
-		{
-			// Convert input level from db and do very basic smoothing
-			inputLevel = (.99f * inputLevel) + (.01f * powf(10, *(ports.input_level) * 0.05f));
+		// convert input level from db
+		float desiredInputLevel = powf(10, *(ports.input_level) * 0.05f);
 
-			dblData[i] = ports.audio_in[i] * inputLevel;
+		if (fabs(desiredInputLevel - inputLevel) > SMOOTH_EPSILON)
+		{
+			for (unsigned int i = 0; i < n_samples; i++)
+			{
+				// do very basic smoothing
+				inputLevel = (.99f * inputLevel) + (.01f * desiredInputLevel);
+
+				dblData[i] = ports.audio_in[i] * inputLevel;
+			}
+		}
+		else
+		{
+			inputLevel = desiredInputLevel;
+
+			for (unsigned int i = 0; i < n_samples; i++)
+			{
+				dblData[i] = ports.audio_in[i] * inputLevel;
+			}
 		}
 
 		if (currentModel == nullptr)
@@ -205,12 +222,27 @@ namespace NAM {
 			currentModel->finalize_(n_samples);
 		}
 
-		for (unsigned int i = 0; i < n_samples; i++)
-		{
-			// Convert output level from db and do very basic smoothing
-			outputLevel = (.99f * outputLevel) + (.01f * powf(10, *(ports.output_level) * 0.05f));
+		// convert output level from db
+		float desiredOutputLevel = powf(10, *(ports.output_level) * 0.05f);
 
-			ports.audio_out[i] = (float)(dblData[i] * outputLevel);
+		if (fabs(desiredOutputLevel - outputLevel) > SMOOTH_EPSILON)
+		{
+			for (unsigned int i = 0; i < n_samples; i++)
+			{
+				// do very basic smoothing
+				outputLevel = (.99f * outputLevel) + (.01f * desiredOutputLevel);
+
+				ports.audio_out[i] = (float)(dblData[i] * outputLevel);
+			}
+		}
+		else
+		{
+			outputLevel = desiredOutputLevel;
+
+			for (unsigned int i = 0; i < n_samples; i++)
+			{
+				ports.audio_out[i] = (float)(dblData[i] * outputLevel);
+			}
 		}
 
 		if (stateChanged)
