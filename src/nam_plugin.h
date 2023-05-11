@@ -107,5 +107,7 @@ namespace NAM {
 		std::vector<double> dblData;
 
 		float m_rate;
+		float inputLevel = 0;
+		float outputLevel = 0;
 	};
 }

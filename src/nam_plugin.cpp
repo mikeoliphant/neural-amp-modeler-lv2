@@ -186,8 +186,9 @@ namespace NAM {
 		if (dblData.size() != n_samples)
 			dblData.resize(n_samples);
 
-		float inputLevel = powf(10, *(ports.input_level) * 0.05f);
-		float outputLevel = powf(10, *(ports.output_level) * 0.05f);
+		// Convert input/output levels from db and do very basic smoothing
+		inputLevel = (.99f * inputLevel) + (.01f * powf(10, *(ports.input_level) * 0.05f));
+		outputLevel = (.99f * outputLevel) + (.01f * powf(10, *(ports.output_level) * 0.05f));
 
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
