@@ -186,12 +186,11 @@ namespace NAM {
 		if (dblData.size() != n_samples)
 			dblData.resize(n_samples);
 
-		// Convert input/output levels from db and do very basic smoothing
-		inputLevel = (.99f * inputLevel) + (.01f * powf(10, *(ports.input_level) * 0.05f));
-		outputLevel = (.99f * outputLevel) + (.01f * powf(10, *(ports.output_level) * 0.05f));
-
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
+			// Convert input level from db and do very basic smoothing
+			inputLevel = (.99f * inputLevel) + (.01f * powf(10, *(ports.input_level) * 0.05f));
+
 			dblData[i] = ports.audio_in[i] * inputLevel;
 		}
 
@@ -208,14 +207,19 @@ namespace NAM {
 
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
+			// Convert output level from db and do very basic smoothing
+			outputLevel = (.99f * outputLevel) + (.01f * powf(10, *(ports.output_level) * 0.05f));
+
 			ports.audio_out[i] = (float)(dblData[i] * outputLevel);
 		}
+
 		if (stateChanged)
 		{
 			stateChanged = false;
 			lv2_atom_forge_frame_time(&atom_forge, 0);
 			write_state_changed();
 		}
+
 		lv2_atom_forge_pop(&atom_forge,&sequence_frame);
 	}
 
