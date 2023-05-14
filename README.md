@@ -8,7 +8,17 @@ To get the intended behavior, **you must run your audio host at the same sample 
 
 For amp-only models (the most typical), **you will need to run an impulse reponse after this plugin** to model the cabinet.
 
-### Compiling
+### Models and Performance
+
+The best source of models is [ToneHunt](https://tonehunt.org/).
+
+NAM models are generally quite expensive to run. This isn't (much of) an issue on modern PCs, but you may have trouble running on less powerful hardware.
+
+A Raspberry Pi 4 running a 64bit OS can run "standard" NAM models with a bit of room to spare for a cabinet IR and some lightweight effects.
+
+If you are having trouble running a "standard" model, try looking for "feather" (the least expensive) models. You can find a list of ["feather"-tagged models on ToneHunt](https://tonehunt.org/?tags=feather-mdl). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
+
+### Building
 
 First clone the repository:
 ```bash
