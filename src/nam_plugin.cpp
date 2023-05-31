@@ -20,6 +20,8 @@ namespace NAM {
 
 	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
 	{
+		logger.log = nullptr;
+
 		for (size_t i = 0; features[i]; ++i) {
 			if (std::string(features[i]->URI) == std::string(LV2_URID__map))
 				map = static_cast<LV2_URID_Map*>(features[i]->data);
@@ -90,6 +92,7 @@ namespace NAM {
 					} else 
 					{
 						lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
+
 						nam->stagedModel = get_dsp(msg->path);
 						nam->stagedModelPath = msg->path;
 
@@ -146,8 +149,6 @@ namespace NAM {
 
 	void Plugin::process(uint32_t n_samples) noexcept
 	{
-		return;
-
 		lv2_atom_forge_set_buffer(&atom_forge,(uint8_t*)ports.notify,ports.notify->atom.size);
 		lv2_atom_forge_sequence_head(&atom_forge,&sequence_frame,uris.units_frame);
 
@@ -259,8 +260,7 @@ namespace NAM {
 	{
 		auto nam = static_cast<NAM::Plugin*>(instance);
 
-		// Commented out because Reaper seems to crash 80% of the time if we log here
-		//lv2_log_trace(&nam->logger, "Saving state\n");
+		lv2_log_trace(&nam->logger, "Saving state\n");
 
 		if (!nam->currentModel) {
 			return LV2_STATE_SUCCESS;
@@ -300,7 +300,7 @@ namespace NAM {
 	LV2_State_Status Plugin::restore(LV2_Handle instance, LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, 
 		uint32_t flags, const LV2_Feature* const* features)
 	{
-		return LV2_STATE_SUCCESS;
+		//if (!haveLog) return LV2_STATE_SUCCESS;
 
 		auto nam = static_cast<NAM::Plugin*>(instance);
 
