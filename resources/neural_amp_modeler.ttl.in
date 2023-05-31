@@ -15,7 +15,7 @@
 
 <@NAM_LV2_ID@#model>
         a lv2:Parameter;
-	mod:fileTypes "nammodel";
+	mod:fileTypes "nam";
         rdfs:label "Neural Model";
         rdfs:range atom:Path.
 
@@ -99,5 +99,5 @@ A large collection of .nam files is available at https://tonehunt.org/
 		units:unit units:db;
 	];
     state:state [
-            <@NAM_LV2_ID@#model> <click.wav> ;
+            <@NAM_LV2_ID@#model>;
     ].

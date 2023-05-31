@@ -13,7 +13,9 @@ namespace NAM {
 	{
 		// Turn on fast tanh approximation
 		activations::Activation::enable_fast_tanh();
-		currentModelPath.reserve(MAX_FILE_NAME+1); // prevent allocations on the audio thread.
+
+		// prevent allocations on the audio thread
+		currentModelPath.reserve(MAX_FILE_NAME+1);
 	}
 
 	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
@@ -94,6 +96,7 @@ namespace NAM {
 						// Enable model loudness normalization
 						nam->stagedModel->SetNormalize(true);
 					}
+
 					LV2WorkType response = kWorkTypeSwitch;
 					respond(handle, sizeof(response), &response);
 
@@ -121,7 +124,7 @@ namespace NAM {
 
 				std::swap(nam->currentModel, nam->stagedModel);
 				nam->currentModelPath = nam->stagedModelPath;
-				assert(nam->currentModelPath.capacity() == MAX_FILE_NAME+1);
+				assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1);
 				nam->stateChanged = true;
 
 				nam->deleteModel = std::move(nam->stagedModel);
@@ -143,6 +146,7 @@ namespace NAM {
 
 	void Plugin::process(uint32_t n_samples) noexcept
 	{
+		return;
 
 		lv2_atom_forge_set_buffer(&atom_forge,(uint8_t*)ports.notify,ports.notify->atom.size);
 		lv2_atom_forge_sequence_head(&atom_forge,&sequence_frame,uris.units_frame);
@@ -185,9 +189,6 @@ namespace NAM {
 			}
 		}
 
-		if (dblData.size() != n_samples)
-			dblData.resize(n_samples);
-
 		// convert input level from db
 		float desiredInputLevel = powf(10, *(ports.input_level) * 0.05f);
 
@@ -198,7 +199,7 @@ namespace NAM {
 				// do very basic smoothing
 				inputLevel = (.99f * inputLevel) + (.01f * desiredInputLevel);
 
-				dblData[i] = ports.audio_in[i] * inputLevel;
+				ports.audio_out[i] = ports.audio_in[i] * inputLevel;
 			}
 		}
 		else
@@ -207,7 +208,7 @@ namespace NAM {
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				dblData[i] = ports.audio_in[i] * inputLevel;
+				ports.audio_out[i] = ports.audio_in[i] * inputLevel;
 			}
 		}
 
@@ -216,9 +217,7 @@ namespace NAM {
 		}
 		else
 		{
-			double* data = dblData.data();
-
-			currentModel->process(&data, &data, 1, n_samples, 1.0, 1.0, mNAMParams);
+			currentModel->process(&ports.audio_out, &ports.audio_out, 1, n_samples, 1.0, 1.0, mNAMParams);
 			currentModel->finalize_(n_samples);
 		}
 
@@ -232,7 +231,7 @@ namespace NAM {
 				// do very basic smoothing
 				outputLevel = (.99f * outputLevel) + (.01f * desiredOutputLevel);
 
-				ports.audio_out[i] = (float)(dblData[i] * outputLevel);
+				ports.audio_out[i] *= outputLevel;
 			}
 		}
 		else
@@ -241,7 +240,7 @@ namespace NAM {
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				ports.audio_out[i] = (float)(dblData[i] * outputLevel);
+				ports.audio_out[i] *= outputLevel;
 			}
 		}
 
@@ -260,7 +259,8 @@ namespace NAM {
 	{
 		auto nam = static_cast<NAM::Plugin*>(instance);
 
-		lv2_log_trace(&nam->logger, "Saving state\n");
+		// Commented out because Reaper seems to crash 80% of the time if we log here
+		//lv2_log_trace(&nam->logger, "Saving state\n");
 
 		if (!nam->currentModel) {
 			return LV2_STATE_SUCCESS;
@@ -300,6 +300,8 @@ namespace NAM {
 	LV2_State_Status Plugin::restore(LV2_Handle instance, LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, 
 		uint32_t flags, const LV2_Feature* const* features)
 	{
+		return LV2_STATE_SUCCESS;
+
 		auto nam = static_cast<NAM::Plugin*>(instance);
 
 		// Get model_Path from state

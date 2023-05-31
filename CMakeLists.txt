@@ -11,13 +11,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	include_directories(SYSTEM /usr/local/include)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	link_libraries(stdc++fs)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN)
 else()
 	message(FATAL_ERROR "Unrecognized Platform!")
 endif()
-
-link_libraries(stdc++fs)
 
 set(NAM_LV2_ID http://github.com/mikeoliphant/neural-amp-modeler-lv2)
 
@@ -26,6 +25,8 @@ include_directories(SYSTEM deps/lv2/include)
 include_directories(SYSTEM deps/NeuralAmpModelerCore/NAM)
 include_directories(SYSTEM deps/json)
 include_directories(SYSTEM deps/denormal)
+
+add_definitions(-DNAM_SAMPLE_FLOAT)
 
 add_subdirectory(src)
 

@@ -70,7 +70,6 @@ static const void* extension_data(const char* uri)
 		return &state;
 	}
 
-
 	if (!strcmp(uri, LV2_WORKER__interface))
 		return &worker;
 

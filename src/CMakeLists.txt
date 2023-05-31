@@ -31,7 +31,6 @@ set_target_properties(neural_amp_modeler
 	PREFIX ""
 )
 
-
 # Platform
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
