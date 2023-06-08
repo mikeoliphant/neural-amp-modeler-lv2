@@ -99,5 +99,5 @@ A large collection of .nam files is available at https://tonehunt.org/
 		units:unit units:db;
 	];
     state:state [
-            <@NAM_LV2_ID@#model>;
+            <@NAM_LV2_ID@#model> "";
     ].
