@@ -1,0 +1,1 @@
+These are some sample NAM models designed to be used for performance testing on CPU-limited devices. They are all based on a [LiveSpice model of a Boss SD-1 pedal](https://blog.nostatic.org/2023/04/this-boss-sd-1-pedal-does-not-exist.html).
