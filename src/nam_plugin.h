@@ -31,9 +31,11 @@ namespace NAM {
 		kWorkTypeSwitch
 	};
 
+	constexpr uint32_t MaximumFileLength = 1023;
+
 	struct LV2LoadModelMsg {
 		LV2WorkType type;
-		char path[1024];
+		char path[MaximumFileLength+1];
 	};
 
 	class Plugin {
@@ -56,7 +58,6 @@ namespace NAM {
 		std::unique_ptr<::DSP> currentModel;
 		std::unique_ptr<::DSP> stagedModel;
 		std::unique_ptr<::DSP> deleteModel;
-		bool stateChanged = false;
 
 		std::string currentModelPath;
 		std::string stagedModelPath;
@@ -69,7 +70,9 @@ namespace NAM {
 		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
 		void process(uint32_t n_samples) noexcept;
 		
-		void write_set_patch(std::string filename);
+		void request_work(const char*filename, size_t length);
+
+		void write_set_patch(const std::string& filename);
 		void write_state_changed();
 
 		static LV2_Worker_Status work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
@@ -104,6 +107,8 @@ namespace NAM {
 		LV2_Atom_Forge atom_forge = {};
 		LV2_Atom_Forge_Frame sequence_frame;
 
+		bool requestPathPropertyNotification = false;
+		bool requestStateChangeNotification = false;
 		float m_rate;
 		float inputLevel = 0;
 		float outputLevel = 0;
