@@ -5,6 +5,7 @@
 #include "nam_plugin.h"
 #include "activations.h"
 #include <cassert>
+#include <filesystem>
 
 #define SMOOTH_EPSILON .0001f
 
@@ -20,6 +21,7 @@ namespace NAM {
 
 	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
 	{
+		
 		logger.log = nullptr;
 
 		for (size_t i = 0; features[i]; ++i) {
@@ -62,6 +64,10 @@ namespace NAM {
 		uris.state_StateChanged = map->map(map->handle, LV2_STATE__StateChanged);
 
 		uris.model_Path = map->map(map->handle, MODEL_URI);
+
+		// MOD requires property notification without asking when started.
+		requestPathPropertyNotification = true; 
+
 
 		return true;
 	}
@@ -126,13 +132,8 @@ namespace NAM {
 				auto nam = static_cast<NAM::Plugin*>(instance);
 
 				std::swap(nam->currentModel, nam->stagedModel);
-				nam->currentModelPath = nam->stagedModelPath;
-				assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1);
-				nam->stateChanged = true;
-
+				
 				nam->deleteModel = std::move(nam->stagedModel);
-
-				nam->write_set_patch(nam->currentModelPath);
 
 				return LV2_WORKER_SUCCESS;
 			}
@@ -158,8 +159,7 @@ namespace NAM {
 			{
 				const auto obj = reinterpret_cast<LV2_Atom_Object*>(&event->body);
 				if (obj->body.otype == uris.patch_Get) {
-					lv2_atom_forge_frame_time(&atom_forge, 0);
-					write_set_patch(currentModelPath);
+					this->requestPathPropertyNotification = true;
 				}
 
 				if (obj->body.otype == uris.patch_Set)
@@ -176,13 +176,10 @@ namespace NAM {
 						{
 							lv2_atom_object_get(obj, uris.patch_value, &file_path, 0);
 
-							if (file_path && (file_path->size > 0) && (file_path->size < 1024))
+							if (file_path && (file_path->size > 0) && (file_path->size < MaximumFileLength))
 							{
-								LV2LoadModelMsg msg = { kWorkTypeLoad, {} };
-
-								memcpy(msg.path, (const char*)LV2_ATOM_BODY_CONST(file_path), file_path->size);
-
-								schedule->schedule_work(schedule->handle, sizeof(msg), &msg);
+								request_work((const char*)LV2_ATOM_BODY_CONST(file_path), file_path->size);
+								this->requestStateChangeNotification = true;
 							}
 						}
 					}
@@ -213,10 +210,7 @@ namespace NAM {
 			}
 		}
 
-		if (currentModel == nullptr)
-		{
-		}
-		else
+		if (currentModel != nullptr)
 		{
 			currentModel->process(&ports.audio_out, &ports.audio_out, 1, n_samples, 1.0, 1.0, mNAMParams);
 			currentModel->finalize_(n_samples);
@@ -244,10 +238,16 @@ namespace NAM {
 				ports.audio_out[i] *= outputLevel;
 			}
 		}
-
-		if (stateChanged)
+		if (this->requestPathPropertyNotification)
 		{
-			stateChanged = false;
+			requestPathPropertyNotification = false;
+			lv2_atom_forge_frame_time(&atom_forge, 0);
+			write_set_patch(currentModelPath);
+
+		}
+		if (requestStateChangeNotification)
+		{
+			requestStateChangeNotification = false;
 			lv2_atom_forge_frame_time(&atom_forge, 0);
 			write_state_changed();
 		}
@@ -297,6 +297,13 @@ namespace NAM {
 		return LV2_STATE_SUCCESS;
 	}
 
+	static bool isAbsolutePath(const char*path)
+	{
+		// Warning: not for use on realtime thread, since it allocates memory.
+		// This method will need to be replaced if the plugin ever implements threadSafeRestore.
+		std::filesystem::path fsPath {path};
+		return fsPath.is_absolute();
+	}
 	LV2_State_Status Plugin::restore(LV2_Handle instance, LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, 
 		uint32_t flags, const LV2_Feature* const* features)
 	{
@@ -324,52 +331,59 @@ namespace NAM {
 
 		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
 
-		if (map_path == nullptr)
-		{
-			lv2_log_error(&nam->logger, "LV2_STATE__mapPath unsupported by host\n");
+		char*mappedPath = nullptr;
+		const char*path = (const char*)value;
+		size_t pathLen = strlen(path);
 
-			return LV2_STATE_ERR_NO_FEATURE;
+		if (map_path != nullptr && pathLen != 0 && !isAbsolutePath(path))
+		{
+			// Map abstract state path to absolute path
+			mappedPath = map_path->absolute_path(map_path->handle, (const char *)value);
+			path = mappedPath;
 		}
 
-		// Map abstract state path to absolute path
-		char* path = map_path->absolute_path(map_path->handle, (const char *)value);
-
-		size_t pathLen = strlen(path);
 
 		LV2_State_Status result = LV2_STATE_SUCCESS;
 
-		if (pathLen < 1024)
+		if (pathLen < MaximumFileLength)
 		{
 			// Schedule model to be loaded by the provided worker
-			NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
+			nam->request_work(path,pathLen);
 
-			memcpy(msg.path, path, pathLen);
-			nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
+			// MOD requires notification of the change of property after a state load.
+			// The notification will get sent during the next run call.
+			nam->requestPathPropertyNotification = true;
+			nam->requestStateChangeNotification = false;
 		}
 		else
 		{
-			lv2_log_error(&nam->logger, "Model path is too long (max 1024 chars)\n");
+			lv2_log_error(&nam->logger, "Model path is too long (max %d chars)\n",(int)MaximumFileLength);
 
 			result = LV2_STATE_ERR_UNKNOWN;
 		}
 
-		LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
-
-		if (free_path != nullptr)
+		if (mappedPath != nullptr)
 		{
-			free_path->free_path(free_path->handle, path);
-		}
-		else
-		{
-#ifndef _WIN32	// Can't free library allocated memory on Windows
-			free(path);
-#endif
-		}
+			LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
 
+			if (free_path != nullptr)
+			{
+				free_path->free_path(free_path->handle, mappedPath);
+			}
+			else
+			{
+	#ifndef _WIN32	// Can't free library allocated memory on Windows, so just leak it.
+				free(mappedPath);
+	#endif
+			}
+		}
+		// MOD isn't smart enough to do a PATCH_get after loading 
+		// state, so send a PATCH_set without being asked when we next get the chance.
+		nam->requestPathPropertyNotification = true;  
 		return result;
 	}
 
-	void Plugin::write_set_patch( std::string filename)
+	void Plugin::write_set_patch( const std::string& filename)
 	{
 		LV2_Atom_Forge_Frame frame;
 
@@ -390,6 +404,15 @@ namespace NAM {
 		lv2_atom_forge_object(&atom_forge, &frame, 0, uris.state_StateChanged);
 			/* object with no properties */
 		lv2_atom_forge_pop(&atom_forge, &frame);
+	}
+
+	void Plugin::request_work(const char*fileName, size_t length)
+	{
+		LV2LoadModelMsg msg = { kWorkTypeLoad, {} };
+		memcpy(msg.path, fileName,length);
+		this->currentModelPath = msg.path;
+		
+		schedule->schedule_work(schedule->handle, sizeof(msg), &msg);
 	}
 
 }
