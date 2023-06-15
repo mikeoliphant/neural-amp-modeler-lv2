@@ -14,6 +14,8 @@
 #include <lv2/log/logger.h>
 #include <lv2/urid/urid.h>
 #include <lv2/atom/forge.h>
+#include <lv2/buf-size/buf-size.h>
+#include <lv2/options/options.h>
 #include <lv2/patch/patch.h>
 #include <lv2/worker/worker.h>
 #include <lv2/state/state.h>
@@ -25,15 +27,28 @@
 #define MODEL_URI PlUGIN_URI "#model"
 
 namespace NAM {
+	static constexpr unsigned int MAX_FILE_NAME = 1024;
 
 	enum LV2WorkType {
 		kWorkTypeLoad,
-		kWorkTypeSwitch
+		kWorkTypeSwitch,
+		kWorkTypeFree
 	};
 
 	struct LV2LoadModelMsg {
 		LV2WorkType type;
-		char path[1024];
+		char path[MAX_FILE_NAME];
+	};
+
+	struct LV2SwitchModelMsg {
+		LV2WorkType type;
+		char path[MAX_FILE_NAME];
+		::DSP* model;
+	};
+
+	struct LV2FreeModelMsg {
+		LV2WorkType type;
+		::DSP* model;
 	};
 
 	class Plugin {
@@ -49,28 +64,25 @@ namespace NAM {
 
 		Ports ports = {};
 
-		LV2_URID_Map* map;
-		LV2_Log_Logger logger;
-		LV2_Worker_Schedule* schedule;
+		LV2_URID_Map* map = nullptr;
+		LV2_Log_Logger logger = {};
+		LV2_Worker_Schedule* schedule = nullptr;
 
-		std::unique_ptr<::DSP> currentModel;
-		std::unique_ptr<::DSP> stagedModel;
-		std::unique_ptr<::DSP> deleteModel;
-		bool stateChanged = false;
-
+		::DSP* currentModel = nullptr;
 		std::string currentModelPath;
-		std::string stagedModelPath;
 
 		std::unordered_map<std::string, double> mNAMParams = {};
 
 		Plugin();
-		~Plugin() = default;
+		~Plugin();
 
 		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
 		void process(uint32_t n_samples) noexcept;
-		
-		void write_set_patch(std::string filename);
-		void write_state_changed();
+
+		void write_current_path();
+
+		static uint32_t options_get(LV2_Handle instance, LV2_Options_Option* options);
+		static uint32_t options_set(LV2_Handle instance, const LV2_Options_Option* options);
 
 		static LV2_Worker_Status work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
 			uint32_t size, const void* data);
@@ -82,19 +94,17 @@ namespace NAM {
 			const LV2_Feature* const* features);
 
 	private:
-		static constexpr size_t MAX_FILE_NAME = 1024;
-
 		struct URIs {
 			LV2_URID atom_Object;
 			LV2_URID atom_Float;
 			LV2_URID atom_Int;
 			LV2_URID atom_Path;
 			LV2_URID atom_URID;
+			LV2_URID bufSize_maxBlockLength;
 			LV2_URID patch_Set;
 			LV2_URID patch_Get;
 			LV2_URID patch_property;
 			LV2_URID patch_value;
-			LV2_URID state_StateChanged;
 			LV2_URID units_frame;
 			LV2_URID model_Path;
 		};
@@ -107,5 +117,6 @@ namespace NAM {
 		float m_rate;
 		float inputLevel = 0;
 		float outputLevel = 0;
+		int32_t maxBufferSize = 0;
 	};
 }
