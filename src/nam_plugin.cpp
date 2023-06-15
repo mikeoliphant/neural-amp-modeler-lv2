@@ -17,8 +17,6 @@ namespace NAM {
 
 	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
 	{
-		logger.log = nullptr;
-
 		for (size_t i = 0; features[i]; ++i) {
 			if (std::string(features[i]->URI) == std::string(LV2_URID__map))
 				map = static_cast<LV2_URID_Map*>(features[i]->data);
@@ -146,8 +144,8 @@ namespace NAM {
 
 	void Plugin::process(uint32_t n_samples) noexcept
 	{
-		lv2_atom_forge_set_buffer(&atom_forge,(uint8_t*)ports.notify,ports.notify->atom.size);
-		lv2_atom_forge_sequence_head(&atom_forge,&sequence_frame,uris.units_frame);
+		lv2_atom_forge_set_buffer(&atom_forge, (uint8_t*)ports.notify, ports.notify->atom.size);
+		lv2_atom_forge_sequence_head(&atom_forge, &sequence_frame, uris.units_frame);
 
 		LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
 		{
@@ -173,7 +171,7 @@ namespace NAM {
 						{
 							lv2_atom_object_get(obj, uris.patch_value, &file_path, 0);
 
-							if (file_path && (file_path->size > 0) && (file_path->size < 1024))
+							if (file_path && (file_path->size > 0) && (file_path->size < MAX_FILE_NAME))
 							{
 								LV2LoadModelMsg msg = { kWorkTypeLoad, {} };
 
@@ -210,10 +208,7 @@ namespace NAM {
 			}
 		}
 
-		if (currentModel == nullptr)
-		{
-		}
-		else
+		if (currentModel != nullptr)
 		{
 			currentModel->process(&ports.audio_out, &ports.audio_out, 1, n_samples, 1.0, 1.0, mNAMParams);
 			currentModel->finalize_(n_samples);
@@ -286,7 +281,7 @@ namespace NAM {
 		}
 		else
 		{
-#ifndef _WIN32	// Can't free library allocated memory on Windows
+#ifndef _WIN32	// Can't free host-allocated memory on plugin side under Windows
 			free(apath);
 #endif
 		}
@@ -335,7 +330,7 @@ namespace NAM {
 
 		LV2_State_Status result = LV2_STATE_SUCCESS;
 
-		if (pathLen < 1024)
+		if (pathLen < MAX_FILE_NAME)
 		{
 			// Schedule model to be loaded by the provided worker
 			NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
@@ -345,7 +340,7 @@ namespace NAM {
 		}
 		else
 		{
-			lv2_log_error(&nam->logger, "Model path is too long (max 1024 chars)\n");
+			lv2_log_error(&nam->logger, "Model path is too long (max %u chars)\n", MAX_FILE_NAME);
 
 			result = LV2_STATE_ERR_UNKNOWN;
 		}
@@ -358,7 +353,7 @@ namespace NAM {
 		}
 		else
 		{
-#ifndef _WIN32	// Can't free library allocated memory on Windows
+#ifndef _WIN32	// Can't free host-allocated memory on plugin side under Windows
 			free(path);
 #endif
 		}
@@ -385,7 +380,9 @@ namespace NAM {
 		LV2_Atom_Forge_Frame frame;
 
 		lv2_atom_forge_object(&atom_forge, &frame, 0, uris.state_StateChanged);
-			/* object with no properties */
+
+		/* object with no properties */
+
 		lv2_atom_forge_pop(&atom_forge, &frame);
 	}
 

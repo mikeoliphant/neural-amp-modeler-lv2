@@ -25,6 +25,7 @@
 #define MODEL_URI PlUGIN_URI "#model"
 
 namespace NAM {
+	static constexpr unsigned int MAX_FILE_NAME = 1024;
 
 	enum LV2WorkType {
 		kWorkTypeLoad,
@@ -33,7 +34,7 @@ namespace NAM {
 
 	struct LV2LoadModelMsg {
 		LV2WorkType type;
-		char path[1024];
+		char path[MAX_FILE_NAME];
 	};
 
 	class Plugin {
@@ -49,9 +50,9 @@ namespace NAM {
 
 		Ports ports = {};
 
-		LV2_URID_Map* map;
-		LV2_Log_Logger logger;
-		LV2_Worker_Schedule* schedule;
+		LV2_URID_Map* map = nullptr;
+		LV2_Log_Logger logger = {};
+		LV2_Worker_Schedule* schedule = nullptr;
 
 		std::unique_ptr<::DSP> currentModel;
 		std::unique_ptr<::DSP> stagedModel;
@@ -82,8 +83,6 @@ namespace NAM {
 			const LV2_Feature* const* features);
 
 	private:
-		static constexpr size_t MAX_FILE_NAME = 1024;
-
 		struct URIs {
 			LV2_URID atom_Object;
 			LV2_URID atom_Float;

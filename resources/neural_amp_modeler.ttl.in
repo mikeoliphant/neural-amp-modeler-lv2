@@ -14,10 +14,10 @@
 @prefix mod: <http://moddevices.com/ns/mod#>.
 
 <@NAM_LV2_ID@#model>
-        a lv2:Parameter;
+	a lv2:Parameter;
 	mod:fileTypes "nam,nammodel";
-        rdfs:label "Neural Model";
-        rdfs:range atom:Path.
+	rdfs:label "Neural Model";
+	rdfs:range atom:Path.
 
 <@NAM_LV2_ID@>
 	a lv2:Plugin, lv2:SimulatorPlugin;
