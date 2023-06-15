@@ -14,6 +14,8 @@
 #include <lv2/log/logger.h>
 #include <lv2/urid/urid.h>
 #include <lv2/atom/forge.h>
+#include <lv2/buf-size/buf-size.h>
+#include <lv2/options/options.h>
 #include <lv2/patch/patch.h>
 #include <lv2/worker/worker.h>
 #include <lv2/state/state.h>
@@ -80,6 +82,9 @@ namespace NAM {
 		void write_current_path();
 		void write_state_changed();
 
+		static uint32_t options_get(LV2_Handle instance, LV2_Options_Option* options);
+		static uint32_t options_set(LV2_Handle instance, const LV2_Options_Option* options);
+
 		static LV2_Worker_Status work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
 			uint32_t size, const void* data);
 		static LV2_Worker_Status work_response(LV2_Handle instance, uint32_t size, const void* data);
@@ -96,6 +101,7 @@ namespace NAM {
 			LV2_URID atom_Int;
 			LV2_URID atom_Path;
 			LV2_URID atom_URID;
+			LV2_URID bufSize_maxBlockLength;
 			LV2_URID patch_Set;
 			LV2_URID patch_Get;
 			LV2_URID patch_property;
@@ -113,5 +119,6 @@ namespace NAM {
 		float m_rate;
 		float inputLevel = 0;
 		float outputLevel = 0;
+		int32_t maxBufferSize = 0;
 	};
 }

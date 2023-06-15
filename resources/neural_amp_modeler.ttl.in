@@ -7,6 +7,7 @@
 @prefix ui:    <http://lv2plug.in/ns/extensions/ui#>.
 @prefix units: <http://lv2plug.in/ns/extensions/units#>.
 @prefix urid:  <http://lv2plug.in/ns/ext/urid#>.
+@prefix opts:  <http://lv2plug.in/ns/ext/options#> .
 @prefix param: <http://lv2plug.in/ns/ext/parameters#>.
 @prefix patch: <http://lv2plug.in/ns/ext/patch#>.
 @prefix state: <http://lv2plug.in/ns/ext/state#>.
@@ -33,8 +34,9 @@
 	];
 
 	lv2:requiredFeature urid:map, work:schedule;
-	lv2:optionalFeature lv2:hardRTCapable;
-	lv2:extensionData work:interface, state:interface;
+	lv2:optionalFeature lv2:hardRTCapable, opts:options, state:threadSafeRestore;
+	lv2:extensionData work:interface, state:interface, options:interface;
+	opts:supportedOption <http://lv2plug.in/ns/ext/buf-size#maxBlockLength>;
 
 	rdfs:comment """
 An LV2 implementation of Neural Amp Modeler.

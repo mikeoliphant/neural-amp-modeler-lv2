@@ -63,9 +63,12 @@ static void cleanup(LV2_Handle instance)
 
 static const void* extension_data(const char* uri)
 {
-	static const LV2_State_Interface  state  = {NAM::Plugin::save, NAM::Plugin::restore};
-	static const LV2_Worker_Interface  worker = { NAM::Plugin::work, NAM::Plugin::work_response, NULL };
+	static const LV2_Options_Interface options = { NAM::Plugin::options_get, NAM::Plugin::options_set };
+	static const LV2_State_Interface   state   = { NAM::Plugin::save, NAM::Plugin::restore};
+	static const LV2_Worker_Interface  worker  = { NAM::Plugin::work, NAM::Plugin::work_response, NULL };
 
+	if (!strcmp(uri, LV2_OPTIONS__interface))
+		return &options;
 	if (!strcmp(uri, LV2_STATE__interface))
 		return &state;
 	if (!strcmp(uri, LV2_WORKER__interface))

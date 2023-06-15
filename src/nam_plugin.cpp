@@ -22,6 +22,9 @@ namespace NAM {
 
 	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
 	{
+		// for fetching initial options, can be null
+		LV2_Options_Option* options = nullptr;
+
 		for (size_t i = 0; features[i]; ++i) {
 			if (std::string(features[i]->URI) == std::string(LV2_URID__map))
 				map = static_cast<LV2_URID_Map*>(features[i]->data);
@@ -29,6 +32,8 @@ namespace NAM {
 				schedule = static_cast<LV2_Worker_Schedule*>(features[i]->data);
 			else if (std::string(features[i]->URI) == std::string(LV2_LOG__log))
 				logger.log = static_cast<LV2_Log_Log*>(features[i]->data);
+			else if (std::string(features[i]->URI) == std::string(LV2_OPTIONS__options))
+				options = static_cast<LV2_Options_Option*>(features[i]->data);
 		}
 	
 		lv2_log_logger_set_map(&logger, map);
@@ -54,6 +59,7 @@ namespace NAM {
 		uris.atom_Int = map->map(map->handle, LV2_ATOM__Int);
 		uris.atom_Path = map->map(map->handle, LV2_ATOM__Path);
 		uris.atom_URID = map->map(map->handle, LV2_ATOM__URID);
+		uris.bufSize_maxBlockLength = map->map(map->handle, LV2_BUF_SIZE__maxBlockLength);
 		uris.patch_Set = map->map(map->handle, LV2_PATCH__Set);
 		uris.patch_Get = map->map(map->handle, LV2_PATCH__Get);
 		uris.patch_property = map->map(map->handle, LV2_PATCH__property);
@@ -62,6 +68,9 @@ namespace NAM {
 		uris.state_StateChanged = map->map(map->handle, LV2_STATE__StateChanged);
 
 		uris.model_Path = map->map(map->handle, MODEL_URI);
+
+		if (options != nullptr)
+			options_set(this, options);
 
 		return true;
 	}
@@ -97,6 +106,18 @@ namespace NAM {
 
 						// Enable model loudness normalization
 						model->SetNormalize(true);
+
+						// Pre-run model to ensure all needed buffers are allocated in advance
+						if (const int32_t numSamples = nam->maxBufferSize)
+						{
+							float* buffer = new float[numSamples];
+
+							std::unordered_map<std::string, double> params = {};
+							model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
+							model->finalize_(numSamples);
+
+							delete[] buffer;
+						}
 					}
 
 					LV2SwitchModelMsg response = { kWorkTypeSwitch, {}, model };
@@ -245,6 +266,28 @@ namespace NAM {
 		}
 	}
 
+	uint32_t Plugin::options_get(LV2_Handle, LV2_Options_Option*)
+	{
+		// currently unused
+		return LV2_OPTIONS_ERR_UNKNOWN;
+	}
+
+	uint32_t Plugin::options_set(LV2_Handle instance, const LV2_Options_Option* options)
+	{
+		auto nam = static_cast<NAM::Plugin*>(instance);
+
+		for (int i=0; options[i].key && options[i].type; ++i)
+		{
+			if (options[i].key == nam->uris.bufSize_maxBlockLength && options[i].type == nam->uris.atom_Int)
+			{
+				nam->maxBufferSize = *(const int32_t*)options[i].value;
+				break;
+			}
+		}
+
+		return LV2_OPTIONS_SUCCESS;
+	}
+
 	LV2_State_Status Plugin::save(LV2_Handle instance, LV2_State_Store_Function store, LV2_State_Handle handle, 
 		uint32_t flags, const LV2_Feature* const* features)
 	{
@@ -385,5 +428,4 @@ namespace NAM {
 
 		lv2_atom_forge_pop(&atom_forge, &frame);
 	}
-
 }
