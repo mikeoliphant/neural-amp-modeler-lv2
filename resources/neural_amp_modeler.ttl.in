@@ -35,7 +35,7 @@
 
 	lv2:requiredFeature urid:map, work:schedule;
 	lv2:optionalFeature lv2:hardRTCapable, opts:options, state:threadSafeRestore;
-	lv2:extensionData work:interface, state:interface, options:interface;
+	lv2:extensionData work:interface, state:interface, opts:interface;
 	opts:supportedOption <http://lv2plug.in/ns/ext/buf-size#maxBlockLength>;
 
 	rdfs:comment """
