@@ -29,12 +29,24 @@ namespace NAM {
 
 	enum LV2WorkType {
 		kWorkTypeLoad,
-		kWorkTypeSwitch
+		kWorkTypeSwitch,
+		kWorkTypeFree
 	};
 
 	struct LV2LoadModelMsg {
 		LV2WorkType type;
 		char path[MAX_FILE_NAME];
+	};
+
+	struct LV2SwitchModelMsg {
+		LV2WorkType type;
+		char path[MAX_FILE_NAME];
+		::DSP* model;
+	};
+
+	struct LV2FreeModelMsg {
+		LV2WorkType type;
+		::DSP* model;
 	};
 
 	class Plugin {
@@ -54,23 +66,18 @@ namespace NAM {
 		LV2_Log_Logger logger = {};
 		LV2_Worker_Schedule* schedule = nullptr;
 
-		std::unique_ptr<::DSP> currentModel;
-		std::unique_ptr<::DSP> stagedModel;
-		std::unique_ptr<::DSP> deleteModel;
-		bool stateChanged = false;
-
+		::DSP* currentModel = nullptr;
 		std::string currentModelPath;
-		std::string stagedModelPath;
 
 		std::unordered_map<std::string, double> mNAMParams = {};
 
 		Plugin();
-		~Plugin() = default;
+		~Plugin();
 
 		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
 		void process(uint32_t n_samples) noexcept;
-		
-		void write_set_patch(std::string filename);
+
+		void write_current_path();
 		void write_state_changed();
 
 		static LV2_Worker_Status work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
