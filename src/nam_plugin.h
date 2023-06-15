@@ -80,7 +80,6 @@ namespace NAM {
 		void process(uint32_t n_samples) noexcept;
 
 		void write_current_path();
-		void write_state_changed();
 
 		static uint32_t options_get(LV2_Handle instance, LV2_Options_Option* options);
 		static uint32_t options_set(LV2_Handle instance, const LV2_Options_Option* options);
@@ -106,7 +105,6 @@ namespace NAM {
 			LV2_URID patch_Get;
 			LV2_URID patch_property;
 			LV2_URID patch_value;
-			LV2_URID state_StateChanged;
 			LV2_URID units_frame;
 			LV2_URID model_Path;
 		};

@@ -65,7 +65,6 @@ namespace NAM {
 		uris.patch_property = map->map(map->handle, LV2_PATCH__property);
 		uris.patch_value = map->map(map->handle, LV2_PATCH__value);
 		uris.units_frame = map->map(map->handle, LV2_UNITS__frame);
-		uris.state_StateChanged = map->map(map->handle, LV2_STATE__StateChanged);
 
 		uris.model_Path = map->map(map->handle, MODEL_URI);
 
@@ -171,7 +170,6 @@ namespace NAM {
 
 		// report change to host/ui
 		nam->write_current_path();
-		nam->write_state_changed();
 
 		return LV2_WORKER_SUCCESS;
 	}
@@ -413,18 +411,6 @@ namespace NAM {
 		lv2_atom_forge_urid(&atom_forge, uris.model_Path);
 		lv2_atom_forge_key(&atom_forge, uris.patch_value);
 		lv2_atom_forge_path(&atom_forge, currentModelPath.c_str(), currentModelPath.length() + 1);
-
-		lv2_atom_forge_pop(&atom_forge, &frame);
-	}
-
-	void Plugin::write_state_changed()
-	{
-		LV2_Atom_Forge_Frame frame;
-
-		lv2_atom_forge_frame_time(&atom_forge, 0);
-		lv2_atom_forge_object(&atom_forge, &frame, 0, uris.state_StateChanged);
-
-		/* object with no properties */
 
 		lv2_atom_forge_pop(&atom_forge, &frame);
 	}
