@@ -11,9 +11,6 @@
 namespace NAM {
 	Plugin::Plugin()
 	{
-		// Turn on fast tanh approximation
-		activations::Activation::enable_fast_tanh();
-
 		// prevent allocations on the audio thread
 		currentModelPath.reserve(MAX_FILE_NAME+1);
 	}
