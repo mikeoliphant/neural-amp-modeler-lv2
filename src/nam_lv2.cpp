@@ -43,15 +43,19 @@ static void activate(LV2_Handle) {}
 
 static void run(LV2_Handle instance, uint32_t n_samples)
 {
+#ifndef __MOD_DEVICES__
 	// Disable floating point denormals
 	std::fenv_t fe_state;
 	std::feholdexcept(&fe_state);
 	disable_denormals();
+#endif
 
 	static_cast<NAM::Plugin*>(instance)->process(n_samples);
 
+#ifndef __MOD_DEVICES__
 	// restore previous floating point state
 	std::feupdateenv(&fe_state);
+#endif
 }
 
 static void deactivate(LV2_Handle) {}
