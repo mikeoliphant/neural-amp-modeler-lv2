@@ -162,8 +162,6 @@ namespace NAM {
 
 		// swap current model with new one
 		nam->currentModel = msg->model;
-		nam->currentModelPath = msg->path;
-		assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1);
 
 		// send reply
 		nam->schedule->schedule_work(nam->schedule->handle, sizeof(reply), &reply);
@@ -203,9 +201,15 @@ namespace NAM {
 						file_path && file_path->type == uris.atom_Path &&
 						file_path->size > 0 && file_path->size < MAX_FILE_NAME)
 					{
+
 						LV2LoadModelMsg msg = { kWorkTypeLoad, {} };
 						memcpy(msg.path, file_path + 1, file_path->size);
+						currentModelPath = msg.path;
+						
 						schedule->schedule_work(schedule->handle, sizeof(msg), &msg);
+
+						assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1); // check that the assignment hasn't done a memory re-allocation.
+
 					}
 				}
 			}
@@ -293,10 +297,6 @@ namespace NAM {
 
 		lv2_log_trace(&nam->logger, "Saving state\n");
 
-		if (!nam->currentModel) {
-			return LV2_STATE_SUCCESS;
-		}
-
 		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
 
 		if (map_path == nullptr)
@@ -307,6 +307,7 @@ namespace NAM {
 		}
 
 		// Map absolute sample path to an abstract state path
+
 		char* apath = map_path->abstract_path(map_path->handle, nam->currentModelPath.c_str());
 
 		store(handle, nam->uris.model_Path, apath, strlen(apath) + 1, nam->uris.atom_Path,
@@ -375,6 +376,8 @@ namespace NAM {
 			NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
 
 			memcpy(msg.path, path, pathLen);
+			nam->currentModelPath = msg.path;
+
 			nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
 		}
 		else
