@@ -43,15 +43,17 @@ static void activate(LV2_Handle) {}
 
 static void run(LV2_Handle instance, uint32_t n_samples)
 {
-	// Disable floating point denormals
+#ifdef DISABLE_DENORMALS	// Disable floating point denormals
 	std::fenv_t fe_state;
 	std::feholdexcept(&fe_state);
 	disable_denormals();
+#endif
 
 	static_cast<NAM::Plugin*>(instance)->process(n_samples);
 
-	// restore previous floating point state
+#ifdef DISABLE_DENORMALS	// restore previous floating point state
 	std::feupdateenv(&fe_state);
+#endif
 }
 
 static void deactivate(LV2_Handle) {}

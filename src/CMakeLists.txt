@@ -22,6 +22,12 @@ add_library(neural_amp_modeler MODULE ${SOURCES} ${NAM_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NAM_SOURCES})
 
+option(DISABLE_DENORMALS "Disable floating point denormals" ON)
+
+if(DISABLE_DENORMALS)
+	add_definitions(-DDISABLE_DENORMALS)
+endif(DISABLE_DENORMALS)
+
 target_compile_features(neural_amp_modeler PUBLIC cxx_std_17)
 
 set_target_properties(neural_amp_modeler
