@@ -118,5 +118,6 @@ namespace NAM {
 		float inputLevel = 0;
 		float outputLevel = 0;
 		int32_t maxBufferSize = 0;
+		bool requestWritePath = false;
 	};
 }
