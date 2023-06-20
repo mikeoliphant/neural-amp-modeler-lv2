@@ -166,9 +166,9 @@ namespace NAM {
 		// send reply
 		nam->schedule->schedule_work(nam->schedule->handle, sizeof(reply), &reply);
 
-		// report change to host/ui
-		nam->write_current_path();
-
+		// report change to host/ui the next time process() is called.
+		nam->requestWritePath = true;
+		
 		return LV2_WORKER_SUCCESS;
 	}
 
@@ -184,7 +184,7 @@ namespace NAM {
 				const auto obj = reinterpret_cast<LV2_Atom_Object*>(&event->body);
 				if (obj->body.otype == uris.patch_Get)
 				{
-					write_current_path();
+					this->requestWritePath = true; // coalesce multiple patch sets if required.
 				}
 				else if (obj->body.otype == uris.patch_Set)
 				{
@@ -266,6 +266,14 @@ namespace NAM {
 				ports.audio_out[i] *= outputLevel;
 			}
 		}
+
+		if (requestWritePath)
+		{
+			requestWritePath = false;
+			write_current_path();
+		}
+		lv2_atom_forge_pop(&atom_forge, &sequence_frame);
+
 	}
 
 	uint32_t Plugin::options_get(LV2_Handle, LV2_Options_Option*)
@@ -377,7 +385,6 @@ namespace NAM {
 
 			memcpy(msg.path, path, pathLen);
 			nam->currentModelPath = msg.path;
-
 			nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
 		}
 		else
