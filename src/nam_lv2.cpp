@@ -39,7 +39,10 @@ static void connect_port(LV2_Handle instance, uint32_t port, void* data)
   *(reinterpret_cast<void**>(&nam->ports)+port) = data;
 }
 
-static void activate(LV2_Handle) {}
+static void activate(LV2_Handle instance) {
+	static_cast<NAM::Plugin*>(instance)->activate();
+
+}
 
 static void run(LV2_Handle instance, uint32_t n_samples)
 {
@@ -54,7 +57,9 @@ static void run(LV2_Handle instance, uint32_t n_samples)
 	std::feupdateenv(&fe_state);
 }
 
-static void deactivate(LV2_Handle) {}
+static void deactivate(LV2_Handle instance) {
+	static_cast<NAM::Plugin*>(instance)->deactivate();
+}
 
 static void cleanup(LV2_Handle instance)
 {

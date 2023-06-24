@@ -74,6 +74,43 @@ namespace NAM {
 		return true;
 	}
 
+	::DSP* Plugin::load_model(const char*filename)
+	{
+		// runs on non-RT, can block or use [de]allocations
+			
+		::DSP* model;
+		const size_t pathlen = strlen(filename);
+		if (pathlen == 0 || pathlen >= MAX_FILE_NAME)
+		{
+			// avoid logging an error on an empty path.
+			// but do clear the model.
+			model = nullptr;
+		}
+		else
+		{
+			lv2_log_trace(&logger, "Staging model change: `%s`\n", filename);
+
+			model = get_dsp(filename).release();
+			if (model != nullptr)
+			{
+				// Enable model loudness normalization
+				model->SetNormalize(true);
+
+				// Pre-run model to ensure all needed buffers are allocated in advance
+				if (const int32_t numSamples = maxBufferSize)
+				{
+					float* buffer = new float[numSamples];
+
+					std::unordered_map<std::string, double> params = {};
+					model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
+					model->finalize_(numSamples);
+
+					delete[] buffer;
+				}
+			}
+		}
+		return model;
+	}
 	// runs on non-RT, can block or use [de]allocations
 	LV2_Worker_Status Plugin::work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
 		uint32_t size, const void* data)
@@ -87,40 +124,12 @@ namespace NAM {
 
 				try
 				{
+				
 					// load model from path
-					const size_t pathlen = strlen(msg->path);
-					::DSP* model;
-
-					if (pathlen == 0 || pathlen >= MAX_FILE_NAME)
-					{
-						// avoid logging an error on an empty path.
-						// but do clear the model.
-						model = nullptr;
-					}
-					else
-					{
-						lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
-
-						model = get_dsp(msg->path).release();
-
-						// Enable model loudness normalization
-						model->SetNormalize(true);
-
-						// Pre-run model to ensure all needed buffers are allocated in advance
-						if (const int32_t numSamples = nam->maxBufferSize)
-						{
-							float* buffer = new float[numSamples];
-
-							std::unordered_map<std::string, double> params = {};
-							model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
-							model->finalize_(numSamples);
-
-							delete[] buffer;
-						}
-					}
+					::DSP* model = nam->load_model(msg->path);
 
 					LV2SwitchModelMsg response = { kWorkTypeSwitch, {}, model };
-					memcpy(response.path, msg->path, pathlen);
+					memcpy(response.path, msg->path, strlen(msg->path));
 					respond(handle, sizeof(response), &response);
 
 					return LV2_WORKER_SUCCESS;
@@ -157,13 +166,21 @@ namespace NAM {
 		auto msg = static_cast<const LV2SwitchModelMsg*>(data);
 		auto nam = static_cast<NAM::Plugin*>(instance);
 
+
 		// prepare reply for deleting old model
 		LV2FreeModelMsg reply = { kWorkTypeFree, nam->currentModel };
 
 		// swap current model with new one
 		nam->currentModel = msg->model;
-		nam->currentModelPath = msg->path;
-		assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1);
+		if (nam->currentModel != nullptr)
+		{
+			nam->currentModelPath = msg->path;
+		} else {
+			nam->currentModelPath = "";
+		}
+
+		// make sure assignment didn't reallocate memory on RT thread.
+		assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1); 
 
 		// send reply
 		nam->schedule->schedule_work(nam->schedule->handle, sizeof(reply), &reply);
@@ -178,6 +195,12 @@ namespace NAM {
 	{
 		lv2_atom_forge_set_buffer(&atom_forge, (uint8_t*)ports.notify, ports.notify->atom.size);
 		lv2_atom_forge_sequence_head(&atom_forge, &sequence_frame, uris.units_frame);
+
+		if (requestModelPathUpdate)
+		{
+			requestModelPathUpdate = false;
+			write_current_path();
+		}
 
 		LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
 		{
@@ -340,30 +363,30 @@ namespace NAM {
 		uint32_t    type     = 0;
 		uint32_t    valflags = 0;
 		const void* value = retrieve(handle, nam->uris.model_Path, &size, &type, &valflags);
+		const char* path = "";
+		char* pathMemory = nullptr;
 
 		lv2_log_trace(&nam->logger, "Restoring model '%s'\n", (const char*)value);
 
-		if (!value) {
-			lv2_log_error(&nam->logger, "Missing model_Path\n");
-			return LV2_STATE_ERR_NO_PROPERTY;
+		if (value) {
+			if (type != nam->uris.atom_Path) {
+				lv2_log_error(&nam->logger, "Non-path model_Path\n");
+				return LV2_STATE_ERR_BAD_TYPE;
+			}
+
+			LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
+
+			if (map_path == nullptr)
+			{
+				lv2_log_error(&nam->logger, "LV2_STATE__mapPath unsupported by host\n");
+
+				return LV2_STATE_ERR_NO_FEATURE;
+			}
+
+			// Map abstract state path to absolute path
+			pathMemory = map_path->absolute_path(map_path->handle, (const char *)value);
+			path = pathMemory;
 		}
-
-		if (type != nam->uris.atom_Path) {
-			lv2_log_error(&nam->logger, "Non-path model_Path\n");
-			return LV2_STATE_ERR_BAD_TYPE;
-		}
-
-		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
-
-		if (map_path == nullptr)
-		{
-			lv2_log_error(&nam->logger, "LV2_STATE__mapPath unsupported by host\n");
-
-			return LV2_STATE_ERR_NO_FEATURE;
-		}
-
-		// Map abstract state path to absolute path
-		char* path = map_path->absolute_path(map_path->handle, (const char *)value);
 
 		size_t pathLen = strlen(path);
 
@@ -373,9 +396,25 @@ namespace NAM {
 		{
 			// Schedule model to be loaded by the provided worker
 			NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
-
 			memcpy(msg.path, path, pathLen);
-			nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
+
+			if (!nam->activated)
+			{
+				// load the model synchronously.
+				::DSP*model = nullptr;
+				try {
+					model = nam->load_model(msg.path);
+					nam->currentModelPath = msg.path;
+					nam->requestModelPathUpdate = true;
+
+				} catch (const std::exception&e)
+				{
+					lv2_log_error(&nam->logger, "Unable to load model from: '%s'\n", msg.path);
+				}
+				nam->currentModel = model;
+			} else {
+				nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
+			}
 		}
 		else
 		{
@@ -384,17 +423,20 @@ namespace NAM {
 			result = LV2_STATE_ERR_UNKNOWN;
 		}
 
-		LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
+		if (pathMemory)
+		{
+			LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
 
-		if (free_path != nullptr)
-		{
-			free_path->free_path(free_path->handle, path);
-		}
-		else
-		{
-#ifndef _WIN32	// Can't free host-allocated memory on plugin side under Windows
-			free(path);
-#endif
+			if (free_path != nullptr)
+			{
+				free_path->free_path(free_path->handle, pathMemory);
+			}
+			else
+			{
+	#ifndef _WIN32	// Can't free host-allocated memory on plugin side under Windows. Just leak it.
+				free(pathMemory);
+	#endif
+			}
 		}
 
 		return result;
@@ -413,5 +455,17 @@ namespace NAM {
 		lv2_atom_forge_path(&atom_forge, currentModelPath.c_str(), currentModelPath.length() + 1);
 
 		lv2_atom_forge_pop(&atom_forge, &frame);
+	}
+
+	void Plugin::activate()
+	{
+		activated = true;
+
+		// notify of empty path if state_restore hasn't been called.
+		requestModelPathUpdate = true; 
+	}
+	void Plugin::deactivate()
+	{
+		activated = false;
 	}
 }

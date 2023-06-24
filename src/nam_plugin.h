@@ -70,20 +70,23 @@ namespace NAM {
 
 		::DSP* currentModel = nullptr;
 		std::string currentModelPath;
+		bool requestModelPathUpdate = false;
 
 		std::unordered_map<std::string, double> mNAMParams = {};
 
 		Plugin();
 		~Plugin();
 
-		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
-		void process(uint32_t n_samples) noexcept;
 
-		void write_current_path();
+		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
+		void activate();
+		void process(uint32_t n_samples) noexcept;
+		void deactivate();
 
 		static uint32_t options_get(LV2_Handle instance, LV2_Options_Option* options);
 		static uint32_t options_set(LV2_Handle instance, const LV2_Options_Option* options);
 
+		
 		static LV2_Worker_Status work(LV2_Handle instance, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle,
 			uint32_t size, const void* data);
 		static LV2_Worker_Status work_response(LV2_Handle instance, uint32_t size, const void* data);
@@ -93,6 +96,9 @@ namespace NAM {
 		static LV2_State_Status restore(LV2_Handle instance, LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, uint32_t flags,
 			const LV2_Feature* const* features);
 
+	private:
+		::DSP*load_model(const char*filename);
+		void write_current_path();
 	private:
 		struct URIs {
 			LV2_URID atom_Object;
@@ -118,5 +124,6 @@ namespace NAM {
 		float inputLevel = 0;
 		float outputLevel = 0;
 		int32_t maxBufferSize = 0;
+		bool activated = false;
 	};
 }
