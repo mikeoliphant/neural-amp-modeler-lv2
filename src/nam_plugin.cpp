@@ -74,7 +74,7 @@ namespace NAM {
 		return true;
 	}
 
-	::DSP* Plugin::load_model(const char*filename)
+	::DSP* Plugin::load_model(const char* filename)
 	{
 		// runs on non-RT, can block or use [de]allocations
 			
@@ -401,7 +401,7 @@ namespace NAM {
 			if (!nam->activated)
 			{
 				// load the model synchronously.
-				::DSP*model = nullptr;
+				::DSP* model = nullptr;
 				try {
 					model = nam->load_model(msg.path);
 					nam->currentModelPath = msg.path;

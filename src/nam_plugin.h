@@ -97,7 +97,7 @@ namespace NAM {
 			const LV2_Feature* const* features);
 
 	private:
-		::DSP*load_model(const char*filename);
+		::DSP* load_model(const char* filename);
 		void write_current_path();
 	private:
 		struct URIs {
