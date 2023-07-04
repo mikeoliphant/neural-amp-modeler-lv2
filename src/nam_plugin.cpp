@@ -85,11 +85,14 @@ namespace NAM {
 				auto msg = static_cast<const LV2LoadModelMsg*>(data);
 				auto nam = static_cast<NAM::Plugin*>(instance);
 
+				::DSP* model = nullptr;
+				LV2SwitchModelMsg response = { kWorkTypeSwitch, {}, {} };
+				LV2_Worker_Status result = LV2_WORKER_SUCCESS;
+
 				try
 				{
 					// load model from path
 					const size_t pathlen = strlen(msg->path);
-					::DSP* model;
 
 					if (pathlen == 0 || pathlen >= MAX_FILE_NAME)
 					{
@@ -119,18 +122,22 @@ namespace NAM {
 						}
 					}
 
-					LV2SwitchModelMsg response = { kWorkTypeSwitch, {}, model };
-					memcpy(response.path, msg->path, pathlen);
-					respond(handle, sizeof(response), &response);
+					response.model = model;
 
-					return LV2_WORKER_SUCCESS;
+					memcpy(response.path, msg->path, pathlen);
 				}
 				catch (std::exception& e)
 				{
+					response.path[0] = '\0';
+
 					lv2_log_error(&nam->logger, "Unable to load model from: '%s'\n", msg->path);
+
+					result = LV2_WORKER_ERR_UNKNOWN;
 				}
 
-				break;
+				respond(handle, sizeof(response), &response);
+
+				return result;
 			}
 
 			case kWorkTypeFree:
@@ -331,8 +338,6 @@ namespace NAM {
 	LV2_State_Status Plugin::restore(LV2_Handle instance, LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, 
 		uint32_t flags, const LV2_Feature* const* features)
 	{
-		//if (!haveLog) return LV2_STATE_SUCCESS;
-
 		auto nam = static_cast<NAM::Plugin*>(instance);
 
 		// Get model_Path from state
@@ -343,58 +348,62 @@ namespace NAM {
 
 		lv2_log_trace(&nam->logger, "Restoring model '%s'\n", (const char*)value);
 
-		if (!value) {
-			lv2_log_error(&nam->logger, "Missing model_Path\n");
-			return LV2_STATE_ERR_NO_PROPERTY;
-		}
-
-		if (type != nam->uris.atom_Path) {
-			lv2_log_error(&nam->logger, "Non-path model_Path\n");
-			return LV2_STATE_ERR_BAD_TYPE;
-		}
-
-		LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
-
-		if (map_path == nullptr)
-		{
-			lv2_log_error(&nam->logger, "LV2_STATE__mapPath unsupported by host\n");
-
-			return LV2_STATE_ERR_NO_FEATURE;
-		}
-
-		// Map abstract state path to absolute path
-		char* path = map_path->absolute_path(map_path->handle, (const char *)value);
-
-		size_t pathLen = strlen(path);
+		NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
 
 		LV2_State_Status result = LV2_STATE_SUCCESS;
 
-		if (pathLen < MAX_FILE_NAME)
+		// Check if a path is set
+		if (!value || (type != nam->uris.atom_Path))
+		{
+			msg.path[0] = '\0';
+		}
+		else
+		{
+			LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)lv2_features_data(features, LV2_STATE__mapPath);
+
+			if (map_path == nullptr)
+			{
+				lv2_log_error(&nam->logger, "LV2_STATE__mapPath unsupported by host\n");
+
+				return LV2_STATE_ERR_NO_FEATURE;
+			}
+
+			// Map abstract state path to absolute path
+			char* path = map_path->absolute_path(map_path->handle, (const char *)value);
+
+			size_t pathLen = strlen(path);
+
+			if (pathLen >= MAX_FILE_NAME)
+			{
+				lv2_log_error(&nam->logger, "Model path is too long (max %u chars)\n", MAX_FILE_NAME);
+
+				result = LV2_STATE_ERR_UNKNOWN;
+			}
+			else
+			{
+				memcpy(msg.path, path, pathLen);
+			}
+
+			LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
+
+			if (free_path != nullptr)
+			{
+				free_path->free_path(free_path->handle, path);
+			}
+			else
+			{
+#ifndef _WIN32	// Can't free host-allocated memory on plugin side under Windows
+				free(path);
+#endif
+			}
+		}
+
+		if (result == LV2_STATE_SUCCESS)
 		{
 			// Schedule model to be loaded by the provided worker
-			NAM::LV2LoadModelMsg msg = { NAM::kWorkTypeLoad, {} };
-
-			memcpy(msg.path, path, pathLen);
 			nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
-		}
-		else
-		{
-			lv2_log_error(&nam->logger, "Model path is too long (max %u chars)\n", MAX_FILE_NAME);
 
-			result = LV2_STATE_ERR_UNKNOWN;
-		}
-
-		LV2_State_Free_Path* free_path = (LV2_State_Free_Path*)lv2_features_data(features, LV2_STATE__freePath);
-
-		if (free_path != nullptr)
-		{
-			free_path->free_path(free_path->handle, path);
-		}
-		else
-		{
-#ifndef _WIN32	// Can't free host-allocated memory on plugin side under Windows
-			free(path);
-#endif
+			nam->currentModelPath = msg.path;
 		}
 
 		return result;
