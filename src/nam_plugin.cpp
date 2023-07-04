@@ -25,7 +25,8 @@ namespace NAM {
 		// for fetching initial options, can be null
 		LV2_Options_Option* options = nullptr;
 
-		for (size_t i = 0; features[i]; ++i) {
+		for (size_t i = 0; features[i]; ++i)
+		{
 			if (std::string(features[i]->URI) == std::string(LV2_URID__map))
 				map = static_cast<LV2_URID_Map*>(features[i]->data);
 			else if (std::string(features[i]->URI) == std::string(LV2_WORKER__schedule))
@@ -144,6 +145,7 @@ namespace NAM {
 			{
 				auto msg = static_cast<const LV2FreeModelMsg*>(data);
 				delete msg->model;
+
 				return LV2_WORKER_SUCCESS;
 			}
 
@@ -300,7 +302,8 @@ namespace NAM {
 
 		lv2_log_trace(&nam->logger, "Saving state\n");
 
-		if (!nam->currentModel) {
+		if (!nam->currentModel)
+		{
 			return LV2_STATE_SUCCESS;
 		}
 

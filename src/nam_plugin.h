@@ -114,7 +114,6 @@ namespace NAM {
 		LV2_Atom_Forge atom_forge = {};
 		LV2_Atom_Forge_Frame sequence_frame;
 
-		float m_rate;
 		float inputLevel = 0;
 		float outputLevel = 0;
 		int32_t maxBufferSize = 0;

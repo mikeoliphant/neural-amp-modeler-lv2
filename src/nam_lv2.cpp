@@ -27,7 +27,7 @@ static LV2_Handle instantiate(const LV2_Descriptor*, double rate, const char*, c
 
 		return nullptr;
 	}
-	catch(const std::exception& e)
+	catch(const std::exception)
 	{
 		return nullptr;
 	}
@@ -36,7 +36,8 @@ static LV2_Handle instantiate(const LV2_Descriptor*, double rate, const char*, c
 static void connect_port(LV2_Handle instance, uint32_t port, void* data)
 {
 	auto nam = static_cast<NAM::Plugin*>(instance);
-  *(reinterpret_cast<void**>(&nam->ports)+port) = data;
+
+	*(reinterpret_cast<void**>(&nam->ports)+port) = data;
 }
 
 static void activate(LV2_Handle) {}
