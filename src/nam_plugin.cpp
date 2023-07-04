@@ -127,7 +127,7 @@ namespace NAM {
 
 					memcpy(response.path, msg->path, pathlen);
 				}
-				catch (std::exception& e)
+				catch (std::exception)
 				{
 					response.path[0] = '\0';
 
@@ -422,7 +422,7 @@ namespace NAM {
 		lv2_atom_forge_key(&atom_forge, uris.patch_property);
 		lv2_atom_forge_urid(&atom_forge, uris.model_Path);
 		lv2_atom_forge_key(&atom_forge, uris.patch_value);
-		lv2_atom_forge_path(&atom_forge, currentModelPath.c_str(), currentModelPath.length() + 1);
+		lv2_atom_forge_path(&atom_forge, currentModelPath.c_str(), (uint32_t)currentModelPath.length() + 1);
 
 		lv2_atom_forge_pop(&atom_forge, &frame);
 	}
