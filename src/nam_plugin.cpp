@@ -132,8 +132,8 @@ namespace NAM {
 					response.path[0] = '\0';
 
 					lv2_log_error(&nam->logger, "Unable to load model from: '%s'\n", msg->path);
-
-					result = LV2_WORKER_ERR_UNKNOWN;
+					
+					//result = LV2_WORKER_ERR_UNKNOWN;
 				}
 
 				respond(handle, sizeof(response), &response);
