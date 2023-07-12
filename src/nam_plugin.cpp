@@ -127,7 +127,7 @@ namespace NAM {
 
 					memcpy(response.path, msg->path, pathlen);
 				}
-				catch (std::exception)
+				catch (const std::exception&)
 				{
 					response.path[0] = '\0';
 

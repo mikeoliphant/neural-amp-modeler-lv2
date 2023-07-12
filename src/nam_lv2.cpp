@@ -27,7 +27,7 @@ static LV2_Handle instantiate(const LV2_Descriptor*, double rate, const char*, c
 
 		return nullptr;
 	}
-	catch(const std::exception)
+	catch(const std::exception&)
 	{
 		return nullptr;
 	}
