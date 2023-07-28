@@ -17,10 +17,16 @@ set(NAM_SOURCES	../deps/NeuralAmpModelerCore/NAM/activations.h
 	../deps/NeuralAmpModelerCore/NAM/convnet.cpp
 	../deps/NeuralAmpModelerCore/NAM/convnet.h)
 
-add_library(neural_amp_modeler MODULE ${SOURCES} ${NAM_SOURCES})
+set(DSP_SOURCES	../deps/NeuralAmpModelerCore/dsp/dsp.h
+	../deps/NeuralAmpModelerCore/dsp/dsp.cpp
+	../deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.h
+	../deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.cpp)
+
+add_library(neural_amp_modeler MODULE ${SOURCES} ${NAM_SOURCES} ${DSP_SOURCES})
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NAM_SOURCES})
+source_group(dsp ${CMAKE_CURRENT_SOURCE_DIR} FILES ${DSP_SOURCES})
 
 option(DISABLE_DENORMALS "Disable floating point denormals" ON)
 

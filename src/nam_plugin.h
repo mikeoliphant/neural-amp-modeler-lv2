@@ -21,7 +21,8 @@
 #include <lv2/state/state.h>
 #include <lv2/units/units.h>
 
-#include "dsp.h"
+#include <NAM/dsp.h>
+#include <dsp/RecursiveLinearFilter.h>
 
 #define PlUGIN_URI "http://github.com/mikeoliphant/neural-amp-modeler-lv2"
 #define MODEL_URI PlUGIN_URI "#model"
@@ -64,12 +65,15 @@ namespace NAM {
 
 		Ports ports = {};
 
+		double sampleRate;
+
 		LV2_URID_Map* map = nullptr;
 		LV2_Log_Logger logger = {};
 		LV2_Worker_Schedule* schedule = nullptr;
 
 		::DSP* currentModel = nullptr;
 		std::string currentModelPath;
+		recursive_linear_filter::HighPass mHighPass;
 
 		std::unordered_map<std::string, double> mNAMParams = {};
 

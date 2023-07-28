@@ -1,10 +1,10 @@
 #include <algorithm>
 #include <cmath>
 #include <utility>
+#include <cassert>
 
 #include "nam_plugin.h"
-#include "activations.h"
-#include <cassert>
+#include <NAM/activations.h>
 
 #define SMOOTH_EPSILON .0001f
 
@@ -20,8 +20,14 @@ namespace NAM {
 		delete currentModel;
 	}
 
-	bool Plugin::initialize(double rate, const LV2_Feature* const* features) noexcept
+	bool Plugin::initialize(double sampleRate, const LV2_Feature* const* features) noexcept
 	{
+		this->sampleRate = sampleRate;
+
+		const double highPassCutoffFreq = 5.0;
+		const recursive_linear_filter::HighPassParams highPassParams(sampleRate, highPassCutoffFreq);
+		mHighPass.SetParams(highPassParams);
+
 		// for fetching initial options, can be null
 		LV2_Options_Option* options = nullptr;
 
@@ -243,10 +249,15 @@ namespace NAM {
 			}
 		}
 
+		float** outputPtrs = &ports.audio_out;
+
 		if (currentModel != nullptr)
 		{
 			currentModel->process(&ports.audio_out, &ports.audio_out, 1, n_samples, 1.0, 1.0, mNAMParams);
 			currentModel->finalize_(n_samples);
+
+			// Apply a high pass filter at 5Hz to eliminate any DC offset
+			outputPtrs = mHighPass.Process(outputPtrs, 1, n_samples);
 		}
 
 		// convert output level from db
@@ -259,7 +270,7 @@ namespace NAM {
 				// do very basic smoothing
 				outputLevel = (.99f * outputLevel) + (.01f * desiredOutputLevel);
 
-				ports.audio_out[i] *= outputLevel;
+				ports.audio_out[i] = outputPtrs[0][i] * outputLevel;
 			}
 		}
 		else
@@ -268,7 +279,7 @@ namespace NAM {
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				ports.audio_out[i] *= outputLevel;
+				ports.audio_out[i] = outputPtrs[0][i] * outputLevel;
 			}
 		}
 	}
