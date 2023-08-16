@@ -226,26 +226,30 @@ namespace NAM {
 			}
 		}
 
+		float level;
+
 		// convert input level from db
 		float desiredInputLevel = powf(10, *(ports.input_level) * 0.05f);
 
 		if (fabs(desiredInputLevel - inputLevel) > SMOOTH_EPSILON)
 		{
+			level = inputLevel;
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				// do very basic smoothing
-				inputLevel = (.99f * inputLevel) + (.01f * desiredInputLevel);
+				level = (.99f * level) + (.01f * desiredInputLevel);
 
-				ports.audio_out[i] = ports.audio_in[i] * inputLevel;
+				ports.audio_out[i] = ports.audio_in[i] * level;
 			}
+			inputLevel = level;
 		}
 		else
 		{
-			inputLevel = desiredInputLevel;
+			level = inputLevel = desiredInputLevel;
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				ports.audio_out[i] = ports.audio_in[i] * inputLevel;
+				ports.audio_out[i] = ports.audio_in[i] * level;
 			}
 		}
 
@@ -265,21 +269,23 @@ namespace NAM {
 
 		if (fabs(desiredOutputLevel - outputLevel) > SMOOTH_EPSILON)
 		{
+			level = outputLevel;
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				// do very basic smoothing
-				outputLevel = (.99f * outputLevel) + (.01f * desiredOutputLevel);
+				level = (.99f * level) + (.01f * desiredOutputLevel);
 
 				ports.audio_out[i] = outputPtrs[0][i] * outputLevel;
 			}
+			outputLevel = level;
 		}
 		else
 		{
-			outputLevel = desiredOutputLevel;
+			level = outputLevel = desiredOutputLevel;
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				ports.audio_out[i] = outputPtrs[0][i] * outputLevel;
+				ports.audio_out[i] = outputPtrs[0][i] * level;
 			}
 		}
 	}
