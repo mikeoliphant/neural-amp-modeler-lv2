@@ -122,8 +122,12 @@ namespace NAM {
 							float* buffer = new float[numSamples];
 
 							std::unordered_map<std::string, double> params = {};
-							model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
-							model->finalize_(numSamples);
+							for (int32_t i=0; i<4096; i += numSamples)
+							{
+								std::memset(buffer, 0, sizeof(float)*numSamples);
+								model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
+								model->finalize_(numSamples);
+							}
 
 							delete[] buffer;
 						}
