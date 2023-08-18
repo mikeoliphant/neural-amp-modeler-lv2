@@ -120,6 +120,7 @@ namespace NAM {
 						if (const int32_t numSamples = nam->maxBufferSize)
 						{
 							float* buffer = new float[numSamples];
+							memset(buffer, 0, numSamples * sizeof(float));
 
 							std::unordered_map<std::string, double> params = {};
 							model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
