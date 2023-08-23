@@ -2,7 +2,7 @@
 
 Bare-bones implementation of [Neural Amp Modeler](https://github.com/sdatkinson/neural-amp-modeler) (NAM) models in an LV2 plugin.
 
-**There is no user interface**. Setting the model to use requires that your LV2 host supports atom:Path parameters. Reaper does not. Carla and Ardour do. If your favorite LV2 host does not support atom:Path, let them know you want it. **A Reaper feature request for this is [here](https://forum.cockos.com/showthread.php?p=2505988)**.
+**There is no user interface**. Setting the model to use requires that your LV2 host supports atom:Path parameters. Reaper does as of v6.82. Carla and Ardour do. If your favorite LV2 host does not support atom:Path, let them know you want it.
 
 To get the intended behavior, **you must run your audio host at the same sample rate the model was trained at** (usually 48kHz) - no resampling is done by the plugin.
 
