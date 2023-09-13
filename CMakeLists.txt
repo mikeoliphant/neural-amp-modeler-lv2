@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(NeuralAmpModelerLv2 VERSION 0.1.1)
+project(NeuralAmpModelerLv2 VERSION 0.1.2)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
