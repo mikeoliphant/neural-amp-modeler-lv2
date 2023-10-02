@@ -17,10 +17,10 @@ set(NAM_SOURCES	../deps/NeuralAmpModelerCore/NAM/activations.h
 	../deps/NeuralAmpModelerCore/NAM/convnet.cpp
 	../deps/NeuralAmpModelerCore/NAM/convnet.h)
 
-set(DSP_SOURCES	../deps/NeuralAmpModelerCore/dsp/dsp.h
-	../deps/NeuralAmpModelerCore/dsp/dsp.cpp
-	../deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.h
-	../deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.cpp)
+set(DSP_SOURCES	../deps/AudioDSPTools/dsp/dsp.h
+	../deps/AudioDSPTools/dsp/dsp.cpp
+	../deps/AudioDSPTools/dsp/RecursiveLinearFilter.h
+	../deps/AudioDSPTools/dsp/RecursiveLinearFilter.cpp)
 
 add_library(neural_amp_modeler MODULE ${SOURCES} ${NAM_SOURCES} ${DSP_SOURCES})
 
