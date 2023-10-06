@@ -122,8 +122,7 @@ namespace NAM {
 							float* buffer = new float[numSamples];
 							memset(buffer, 0, numSamples * sizeof(float));
 
-							std::unordered_map<std::string, double> params = {};
-							model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
+							model->process(buffer, buffer, numSamples);
 							model->finalize_(numSamples);
 
 							delete[] buffer;
@@ -258,7 +257,7 @@ namespace NAM {
 
 		if (currentModel != nullptr)
 		{
-			currentModel->process(&ports.audio_out, &ports.audio_out, 1, n_samples, 1.0, 1.0, mNAMParams);
+			currentModel->process(ports.audio_out, ports.audio_out, n_samples);
 			currentModel->finalize_(n_samples);
 
 			// Apply a high pass filter at 5Hz to eliminate any DC offset

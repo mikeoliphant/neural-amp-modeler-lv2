@@ -75,8 +75,6 @@ namespace NAM {
 		std::string currentModelPath;
 		recursive_linear_filter::HighPass mHighPass;
 
-		std::unordered_map<std::string, double> mNAMParams = {};
-
 		Plugin();
 		~Plugin();
 
