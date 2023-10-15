@@ -113,9 +113,6 @@ namespace NAM {
 
 						model = get_dsp(msg->path).release();
 
-						// Enable model loudness normalization
-						model->SetNormalize(true);
-
 						// Pre-run model to ensure all needed buffers are allocated in advance
 						if (const int32_t numSamples = nam->maxBufferSize)
 						{
@@ -241,6 +238,7 @@ namespace NAM {
 
 				ports.audio_out[i] = ports.audio_in[i] * level;
 			}
+
 			inputLevel = level;
 		}
 		else
@@ -264,12 +262,16 @@ namespace NAM {
 			outputPtrs = mHighPass.Process(outputPtrs, 1, n_samples);
 		}
 
-		// convert output level from db
-		float desiredOutputLevel = powf(10, *(ports.output_level) * 0.05f);
+		// Get model normalization gain delta
+		float normalizeGainDelta = currentModel->GetNormalizationFactorLinear();
+
+		// Convert output level from db
+		float desiredOutputLevel = powf(10, *(ports.output_level) * 0.05f) * normalizeGainDelta;
 
 		if (fabs(desiredOutputLevel - outputLevel) > SMOOTH_EPSILON)
 		{
 			level = outputLevel;
+
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				// do very basic smoothing
@@ -277,6 +279,7 @@ namespace NAM {
 
 				ports.audio_out[i] = outputPtrs[0][i] * outputLevel;
 			}
+
 			outputLevel = level;
 		}
 		else
