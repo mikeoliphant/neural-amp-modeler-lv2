@@ -253,6 +253,8 @@ namespace NAM {
 
 		float** outputPtrs = &ports.audio_out;
 
+		float modelLoudnessAdjustmentDB = 0;
+
 		if (currentModel != nullptr)
 		{
 			currentModel->process(ports.audio_out, ports.audio_out, n_samples);
@@ -260,13 +262,16 @@ namespace NAM {
 
 			// Apply a high pass filter at 5Hz to eliminate any DC offset
 			outputPtrs = mHighPass.Process(outputPtrs, 1, n_samples);
+
+			if (currentModel->HasLoudness())
+			{
+				// Normalize model to -18dB
+				modelLoudnessAdjustmentDB = -58 - currentModel->GetLoudness();
+			}
 		}
 
-		// Get model normalization gain delta
-		float normalizeGainDelta = currentModel->GetNormalizationFactorLinear();
-
 		// Convert output level from db
-		float desiredOutputLevel = powf(10, *(ports.output_level) * 0.05f) * normalizeGainDelta;
+		float desiredOutputLevel = powf(10, (*(ports.output_level) + modelLoudnessAdjustmentDB) * 0.05f);
 
 		if (fabs(desiredOutputLevel - outputLevel) > SMOOTH_EPSILON)
 		{
