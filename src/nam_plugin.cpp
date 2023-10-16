@@ -266,7 +266,7 @@ namespace NAM {
 			if (currentModel->HasLoudness())
 			{
 				// Normalize model to -18dB
-				modelLoudnessAdjustmentDB = -58 - currentModel->GetLoudness();
+				modelLoudnessAdjustmentDB = -18 - currentModel->GetLoudness();
 			}
 		}
 
