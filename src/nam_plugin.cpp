@@ -24,10 +24,6 @@ namespace NAM {
 	{
 		this->sampleRate = sampleRate;
 
-		const double highPassCutoffFreq = 5.0;
-		const recursive_linear_filter::HighPassParams highPassParams(sampleRate, highPassCutoffFreq);
-		mHighPass.SetParams(highPassParams);
-
 		// for fetching initial options, can be null
 		LV2_Options_Option* options = nullptr;
 
@@ -251,17 +247,12 @@ namespace NAM {
 			}
 		}
 
-		float** outputPtrs = &ports.audio_out;
-
 		float modelLoudnessAdjustmentDB = 0;
 
 		if (currentModel != nullptr)
 		{
 			currentModel->process(ports.audio_out, ports.audio_out, n_samples);
 			currentModel->finalize_(n_samples);
-
-			// Apply a high pass filter at 5Hz to eliminate any DC offset
-			outputPtrs = mHighPass.Process(outputPtrs, 1, n_samples);
 
 			if (currentModel->HasLoudness())
 			{
@@ -282,7 +273,7 @@ namespace NAM {
 				// do very basic smoothing
 				level = (.99f * level) + (.01f * desiredOutputLevel);
 
-				ports.audio_out[i] = outputPtrs[0][i] * outputLevel;
+				ports.audio_out[i] = ports.audio_out[i] * outputLevel;
 			}
 
 			outputLevel = level;
@@ -293,8 +284,19 @@ namespace NAM {
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				ports.audio_out[i] = outputPtrs[0][i] * level;
+				ports.audio_out[i] = ports.audio_out[i] * level;
 			}
+		}
+
+		for (unsigned int i = 0; i < n_samples; i++)
+		{
+			float dcInput = ports.audio_out[i];
+
+			// dc blocker
+			ports.audio_out[i] = ports.audio_out[i] - prevDCInput + 0.995 * prevDCOutput;
+
+			prevDCInput = dcInput;
+			prevDCOutput = ports.audio_out[i];
 		}
 	}
 

@@ -22,7 +22,6 @@
 #include <lv2/units/units.h>
 
 #include <NAM/dsp.h>
-#include <dsp/RecursiveLinearFilter.h>
 
 #define PlUGIN_URI "http://github.com/mikeoliphant/neural-amp-modeler-lv2"
 #define MODEL_URI PlUGIN_URI "#model"
@@ -73,7 +72,8 @@ namespace NAM {
 
 		::DSP* currentModel = nullptr;
 		std::string currentModelPath;
-		recursive_linear_filter::HighPass mHighPass;
+		float prevDCInput = 0;
+		float prevDCOutput = 0;
 
 		Plugin();
 		~Plugin();

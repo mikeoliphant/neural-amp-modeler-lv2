@@ -23,7 +23,6 @@ set(NAM_LV2_ID http://github.com/mikeoliphant/neural-amp-modeler-lv2)
 include_directories(SYSTEM deps/eigen)
 include_directories(SYSTEM deps/lv2/include)
 include_directories(SYSTEM deps/NeuralAmpModelerCore)
-include_directories(SYSTEM deps/AudioDSPTools)
 include_directories(SYSTEM deps/json)
 include_directories(SYSTEM deps/denormal)
 
