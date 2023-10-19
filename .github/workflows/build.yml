@@ -41,5 +41,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: neural-amp-modeler-lv2
-        path: ${{github.workspace}}/build/neural-amp-modeler-lv2
+        name: neural-amp-modeler.lv2
+        path: ${{github.workspace}}/build/neural-amp-modeler.lv2
