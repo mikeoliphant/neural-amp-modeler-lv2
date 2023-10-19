@@ -24,6 +24,12 @@ jobs:
         cmake --build . --config $BUILD_TYPE -j4
         cpack
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: neural_amp_modeler.lv2-linux-x64
+        path: ${{github.workspace}}/build/neural_amp_modeler.lv2
+        
   build-windows:
     name: Build Windows
     runs-on: windows-latest
@@ -41,5 +47,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: neural_amp_modeler.lv2
+        name: neural_amp_modeler.lv2-win
         path: ${{github.workspace}}/build/neural_amp_modeler.lv2
