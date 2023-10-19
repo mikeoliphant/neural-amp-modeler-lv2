@@ -37,3 +37,9 @@ jobs:
       run: |
         cmake.exe -G "Visual Studio 17 2022" -A x64 ..
         cmake --build . --config=release -j4
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: neural-amp-modeler-lv2
+        path: ${{github.workspace}}/build/neural-amp-modeler-lv2
