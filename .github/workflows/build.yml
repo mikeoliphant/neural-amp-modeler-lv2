@@ -47,7 +47,7 @@ jobs:
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake.exe -G "Visual Studio 17 2022" -A x64 ..
+        cmake.exe -G "Visual Studio 17 2022" -A x64  -T ClangCL ..
         cmake --build . --config=release -j4
         
     - name: Upload artifact
