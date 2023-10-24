@@ -28,7 +28,7 @@ if (DISABLE_DENORMALS)
 	add_definitions(-DDISABLE_DENORMALS)
 endif (DISABLE_DENORMALS)
 
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)")
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
 	option(USE_NATIVE_ARCH "Enable architecture-specific optimizations" ON)
 
 	if (USE_NATIVE_ARCH)
