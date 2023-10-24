@@ -24,9 +24,18 @@ source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NAM_SOURCES})
 
 option(DISABLE_DENORMALS "Disable floating point denormals" ON)
 
-if(DISABLE_DENORMALS)
+if (DISABLE_DENORMALS)
 	add_definitions(-DDISABLE_DENORMALS)
-endif(DISABLE_DENORMALS)
+endif (DISABLE_DENORMALS)
+
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)")
+	option(USE_NATIVE_ARCH "Enable architecture-specific optimizations" ON)
+
+	if (USE_NATIVE_ARCH)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64-v3")
+		message("Enabling -march=x86-64-v3")
+	endif (USE_NATIVE_ARCH)
+endif ()
 
 target_compile_features(neural_amp_modeler PUBLIC cxx_std_17)
 
