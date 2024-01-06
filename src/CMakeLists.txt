@@ -29,7 +29,7 @@ if (DISABLE_DENORMALS)
 endif (DISABLE_DENORMALS)
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
-	option(USE_NATIVE_ARCH "Enable architecture-specific optimizations" ON)
+	option(USE_NATIVE_ARCH "Enable architecture-specific optimizations" OFF)
 
 	if (USE_NATIVE_ARCH)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64-v3")
