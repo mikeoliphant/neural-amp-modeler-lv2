@@ -44,4 +44,6 @@ Note - you'll have to change the Visual Studio version if you are using a differ
 
 After building, the plugin will be in **build/neural_amp_modeler.lv2**.
 
-If you have an older processor that does not support moder x64 optimizations, you may need to pass "**&#8209;DUSE_NATIVE_ARCH=OFF**" on your cmake command line.
+### Optimization
+
+If you have a relatively modern x64 processor, you can pass "**&#8209;DUSE_NATIVE_ARCH=ON**" on your cmake command line to enable certain processor-specific optimizations.
