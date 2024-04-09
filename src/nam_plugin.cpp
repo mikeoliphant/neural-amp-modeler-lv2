@@ -288,12 +288,14 @@ namespace NAM {
 			}
 		}
 
+		float dcBlockCoefficient = 1 - (220.0 / sampleRate);
+
 		for (unsigned int i = 0; i < n_samples; i++)
 		{
 			float dcInput = ports.audio_out[i];
 
 			// dc blocker
-			ports.audio_out[i] = ports.audio_out[i] - prevDCInput + 0.995 * prevDCOutput;
+			ports.audio_out[i] = ports.audio_out[i] - prevDCInput + dcBlockCoefficient * prevDCOutput;
 
 			prevDCInput = dcInput;
 			prevDCOutput = ports.audio_out[i];
