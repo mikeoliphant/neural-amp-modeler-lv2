@@ -37,7 +37,7 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
 	endif (USE_NATIVE_ARCH)
 endif ()
 
-target_compile_features(neural_amp_modeler PUBLIC cxx_std_17)
+target_compile_features(neural_amp_modeler PUBLIC cxx_std_20)
 
 set_target_properties(neural_amp_modeler
 	PROPERTIES
@@ -45,6 +45,12 @@ set_target_properties(neural_amp_modeler
 	INTERPROCEDURAL_OPTIMIZATION TRUE
 	PREFIX ""
 )
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT supported OUTPUT error)
+if (supported)
+    set_property(TARGET neural_amp_modeler PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 # Platform
 
