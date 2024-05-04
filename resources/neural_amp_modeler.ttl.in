@@ -39,11 +39,11 @@
 	opts:supportedOption <http://lv2plug.in/ns/ext/buf-size#maxBlockLength>;
 
 	rdfs:comment """
-An LV2 implementation of Neural Amp Modeler.
+LV2 plugin for Neural Amp Modeler machine learning guitar amplifier simulation models
 
-NAM accepts Neural Amp Modeler .nam files.
+Based on the Neural Amp Modeler Core codebase: https://github.com/sdatkinson/NeuralAmpModelerCore
 
-A large collection of .nam files is available at https://tonehunt.org/
+A large collection of .nam models is available at https://tonehunt.org
 """;
 
 	patch:writable <@NAM_LV2_ID@#model>;
