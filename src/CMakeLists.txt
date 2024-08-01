@@ -37,8 +37,6 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
 	endif (USE_NATIVE_ARCH)
 endif ()
 
-target_compile_features(neural_amp_modeler PUBLIC cxx_std_17)
-
 set_target_properties(neural_amp_modeler
 	PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
