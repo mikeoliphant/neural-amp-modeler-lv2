@@ -88,7 +88,7 @@ namespace NAM {
 				auto msg = static_cast<const LV2LoadModelMsg*>(data);
 				auto nam = static_cast<NAM::Plugin*>(instance);
 
-				::DSP* model = nullptr;
+				nam::DSP* model = nullptr;
 				LV2SwitchModelMsg response = { kWorkTypeSwitch, {}, {} };
 				LV2_Worker_Status result = LV2_WORKER_SUCCESS;
 
@@ -107,7 +107,7 @@ namespace NAM {
 					{
 						lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
 
-						model = get_dsp(msg->path).release();
+						model = nam::get_dsp(msg->path).release();
 
 						// Pre-run model to ensure all needed buffers are allocated in advance
 						if (const int32_t numSamples = nam->maxBufferSize)

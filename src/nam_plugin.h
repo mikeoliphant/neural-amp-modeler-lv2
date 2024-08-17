@@ -43,12 +43,12 @@ namespace NAM {
 	struct LV2SwitchModelMsg {
 		LV2WorkType type;
 		char path[MAX_FILE_NAME];
-		::DSP* model;
+		nam::DSP* model;
 	};
 
 	struct LV2FreeModelMsg {
 		LV2WorkType type;
-		::DSP* model;
+		nam::DSP* model;
 	};
 
 	class Plugin {
@@ -70,7 +70,7 @@ namespace NAM {
 		LV2_Log_Logger logger = {};
 		LV2_Worker_Schedule* schedule = nullptr;
 
-		::DSP* currentModel = nullptr;
+		nam::DSP* currentModel = nullptr;
 		std::string currentModelPath;
 		float prevDCInput = 0;
 		float prevDCOutput = 0;

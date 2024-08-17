@@ -96,7 +96,7 @@ LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor(uint32_t index)
 {
 	if (index == 0) {
 		// Turn on fast tanh approximation
-		activations::Activation::enable_fast_tanh();
+		nam::activations::Activation::enable_fast_tanh();
 
 		return &descriptor;
 	}
