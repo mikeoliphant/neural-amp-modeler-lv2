@@ -51,7 +51,7 @@ jobs:
         cmake --build . --config=release -j4
         
     - name: Upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: neural_amp_modeler.lv2-win
         path: ${{github.workspace}}/build/neural_amp_modeler.lv2
