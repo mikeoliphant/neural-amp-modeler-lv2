@@ -11,3 +11,6 @@
 [submodule "deps/AudioDSPTools"]
 	path = deps/AudioDSPTools
 	url = https://github.com/sdatkinson/AudioDSPTools
+[submodule "deps/NeuralAudio"]
+	path = deps/NeuralAudio
+	url = https://github.com/mikeoliphant/NeuralAudio
