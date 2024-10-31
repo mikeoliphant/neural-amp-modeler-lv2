@@ -21,7 +21,7 @@
 #include <lv2/state/state.h>
 #include <lv2/units/units.h>
 
-#include <NAM/dsp.h>
+#include <NeuralAudio/NeuralModel.h>
 
 #define PlUGIN_URI "http://github.com/mikeoliphant/neural-amp-modeler-lv2"
 #define MODEL_URI PlUGIN_URI "#model"
@@ -43,12 +43,12 @@ namespace NAM {
 	struct LV2SwitchModelMsg {
 		LV2WorkType type;
 		char path[MAX_FILE_NAME];
-		nam::DSP* model;
+		NeuralAudio::NeuralModel* model;
 	};
 
 	struct LV2FreeModelMsg {
 		LV2WorkType type;
-		nam::DSP* model;
+		NeuralAudio::NeuralModel* model;
 	};
 
 	class Plugin {
@@ -70,7 +70,7 @@ namespace NAM {
 		LV2_Log_Logger logger = {};
 		LV2_Worker_Schedule* schedule = nullptr;
 
-		nam::DSP* currentModel = nullptr;
+		NeuralAudio::NeuralModel* currentModel = nullptr;
 		std::string currentModelPath;
 		float prevDCInput = 0;
 		float prevDCOutput = 0;

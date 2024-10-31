@@ -1,26 +1,21 @@
+add_subdirectory(../deps/NeuralAudio NeuralAudio)
+
+include_directories(SYSTEM ../deps/NeuralAudio)
+include_directories(SYSTEM ../deps/lv2/include)
+include_directories(SYSTEM ../deps/denormal)
+
 set(SOURCES nam_lv2.cpp
 	nam_plugin.cpp
 	nam_plugin.h)
 
-set(NAM_SOURCES	../deps/NeuralAmpModelerCore/NAM/activations.h
-	../deps/NeuralAmpModelerCore/NAM/activations.cpp
-	../deps/NeuralAmpModelerCore/NAM/version.h
-	../deps/NeuralAmpModelerCore/NAM/lstm.h
-	../deps/NeuralAmpModelerCore/NAM/lstm.cpp
-	../deps/NeuralAmpModelerCore/NAM/dsp.h
-	../deps/NeuralAmpModelerCore/NAM/dsp.cpp
-	../deps/NeuralAmpModelerCore/NAM/get_dsp.cpp
-	../deps/NeuralAmpModelerCore/NAM/util.cpp
-	../deps/NeuralAmpModelerCore/NAM/util.h
-	../deps/NeuralAmpModelerCore/NAM/wavenet.cpp
-	../deps/NeuralAmpModelerCore/NAM/wavenet.h
-	../deps/NeuralAmpModelerCore/NAM/convnet.cpp
-	../deps/NeuralAmpModelerCore/NAM/convnet.h)
+set(NA_SOURCES	../deps/NeuralAudio/NeuralAudio/NeuralModel.h)
 
-add_library(neural_amp_modeler MODULE ${SOURCES} ${NAM_SOURCES})
+add_library(neural_amp_modeler MODULE ${SOURCES} ${NA_SOURCES})
+
+target_link_libraries(neural_amp_modeler PRIVATE NeuralAudio)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
-source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NAM_SOURCES})
+source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NA_SOURCES})
 
 option(DISABLE_DENORMALS "Disable floating point denormals" ON)
 

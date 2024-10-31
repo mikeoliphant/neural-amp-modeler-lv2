@@ -4,7 +4,6 @@
 #include <cassert>
 
 #include "nam_plugin.h"
-#include <NAM/activations.h>
 
 #define SMOOTH_EPSILON .0001f
 
@@ -88,7 +87,7 @@ namespace NAM {
 				auto msg = static_cast<const LV2LoadModelMsg*>(data);
 				auto nam = static_cast<NAM::Plugin*>(instance);
 
-				nam::DSP* model = nullptr;
+				NeuralAudio::NeuralModel* model = nullptr;
 				LV2SwitchModelMsg response = { kWorkTypeSwitch, {}, {} };
 				LV2_Worker_Status result = LV2_WORKER_SUCCESS;
 
@@ -107,19 +106,19 @@ namespace NAM {
 					{
 						lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
 
-						model = nam::get_dsp(msg->path).release();
+						model = NeuralAudio::NeuralModel::CreateFromFile(msg->path);
 
 						// Pre-run model to ensure all needed buffers are allocated in advance
-						if (const int32_t numSamples = nam->maxBufferSize)
-						{
-							float* buffer = new float[numSamples];
-							memset(buffer, 0, numSamples * sizeof(float));
+						//if (const int32_t numSamples = nam->maxBufferSize)
+						//{
+						//	float* buffer = new float[numSamples];
+						//	memset(buffer, 0, numSamples * sizeof(float));
 
-							model->process(buffer, buffer, numSamples);
-							model->finalize_(numSamples);
+						//	model->Process(buffer, buffer, numSamples);
+						//	//model->finalize_(numSamples);
 
-							delete[] buffer;
-						}
+						//	delete[] buffer;
+						//}
 					}
 
 					response.model = model;
@@ -251,14 +250,11 @@ namespace NAM {
 
 		if (currentModel != nullptr)
 		{
-			currentModel->process(ports.audio_out, ports.audio_out, n_samples);
-			currentModel->finalize_(n_samples);
+			std::vector<float> inout( + n_samples);
 
-			if (currentModel->HasLoudness())
-			{
-				// Normalize model to -18dB
-				modelLoudnessAdjustmentDB = -18 - currentModel->GetLoudness();
-			}
+			currentModel->Process(ports.audio_out, ports.audio_out, n_samples);
+
+			modelLoudnessAdjustmentDB = currentModel->GetRecommendedOutputDBAdjustment();
 		}
 
 		// Convert output level from db
