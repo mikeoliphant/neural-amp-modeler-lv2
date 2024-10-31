@@ -8,7 +8,7 @@ set(SOURCES nam_lv2.cpp
 	nam_plugin.cpp
 	nam_plugin.h)
 
-set(NA_SOURCES	../deps/NeuralAudio/NeuralAudio/NeuralModel.h)
+set(NA_SOURCES ../deps/NeuralAudio/NeuralAudio/NeuralModel.h)
 
 add_library(neural_amp_modeler SHARED ${SOURCES} ${NA_SOURCES})
 
