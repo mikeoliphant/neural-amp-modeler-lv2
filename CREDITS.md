@@ -1,6 +1,6 @@
 This repository uses code from a number of sources:
 
-https://github.com/sdatkinson/NeuralAmpModelerPlugin
+https://github.com/sdatkinson/NeuralAmpModelerCore
 
 https://gitlab.com/libeigen/eigen
 
