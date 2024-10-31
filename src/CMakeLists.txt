@@ -10,9 +10,9 @@ set(SOURCES nam_lv2.cpp
 
 set(NA_SOURCES	../deps/NeuralAudio/NeuralAudio/NeuralModel.h)
 
-add_library(neural_amp_modeler STATIC ${SOURCES} ${NA_SOURCES})
+add_library(neural_amp_modeler SHARED ${SOURCES} ${NA_SOURCES})
 
-target_link_libraries(neural_amp_modeler INTERFACE NeuralAudio)
+target_link_libraries(neural_amp_modeler PRIVATE NeuralAudio)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NA_SOURCES})
