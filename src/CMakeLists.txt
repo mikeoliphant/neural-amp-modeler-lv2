@@ -12,7 +12,7 @@ set(NA_SOURCES	../deps/NeuralAudio/NeuralAudio/NeuralModel.h)
 
 add_library(neural_amp_modeler MODULE ${SOURCES} ${NA_SOURCES})
 
-target_link_libraries(neural_amp_modeler PRIVATE NeuralAudio)
+target_link_libraries(neural_amp_modeler PUBLIC NeuralAudio)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NA_SOURCES})
