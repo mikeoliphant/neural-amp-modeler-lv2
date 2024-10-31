@@ -25,13 +25,13 @@ jobs:
         cpack
 
     - name: Upload binary
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: neural_amp_modeler.lv2-linux-amd64
         path: ${{github.workspace}}/build/neural_amp_modeler.lv2
 
 #    - name: Upload deb
-#      uses: actions/upload-artifact@v1
+#      uses: actions/upload-artifact@v4
 #      with:
 #        name: neural_amp_modeler.lv2-linux-deb-amd64
 #        path: ${{github.workspace}}/build/*.deb
