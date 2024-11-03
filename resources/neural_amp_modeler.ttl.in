@@ -16,7 +16,7 @@
 
 <@NAM_LV2_ID@#model>
 	a lv2:Parameter;
-	mod:fileTypes "nam,nammodel";
+	mod:fileTypes "nam,nammodel,json";
 	rdfs:label "Neural Model";
 	rdfs:range atom:Path.
 
@@ -39,11 +39,13 @@
 	opts:supportedOption <http://lv2plug.in/ns/ext/buf-size#maxBlockLength>;
 
 	rdfs:comment """
-LV2 plugin for Neural Amp Modeler machine learning guitar amplifier simulation models
+LV2 plugin for neural network machine learning guitar amplifier simulation models
 
-Based on the Neural Amp Modeler Core codebase: https://github.com/sdatkinson/NeuralAmpModelerCore
+Models supported:
+  Neural Amp Modeler (NAM): https://github.com/sdatkinson/neural-amp-modeler
+  RTNeural keras/Aida-x models: https://github.com/jatinchowdhury18/RTNeural
 
-A large collection of .nam models is available at https://tonehunt.org
+A large collection of models is available at https://tonehunt.org
 """;
 
 	patch:writable <@NAM_LV2_ID@#model>;
