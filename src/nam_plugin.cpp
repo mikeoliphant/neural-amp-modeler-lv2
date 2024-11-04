@@ -220,8 +220,15 @@ namespace NAM {
 
 		float level;
 
+		float modelInputAdjustmentDB = 0;
+
+		if (currentModel != nullptr)
+		{
+			modelInputAdjustmentDB = currentModel->GetRecommendedInputDBAdjustment();
+		}
+
 		// convert input level from db
-		float desiredInputLevel = powf(10, *(ports.input_level) * 0.05f);
+		float desiredInputLevel = powf(10, (*(ports.input_level) + modelInputAdjustmentDB) * 0.05f);
 
 		if (fabs(desiredInputLevel - inputLevel) > SMOOTH_EPSILON)
 		{
@@ -250,8 +257,6 @@ namespace NAM {
 
 		if (currentModel != nullptr)
 		{
-			std::vector<float> inout( + n_samples);
-
 			currentModel->Process(ports.audio_out, ports.audio_out, n_samples);
 
 			modelLoudnessAdjustmentDB = currentModel->GetRecommendedOutputDBAdjustment();
