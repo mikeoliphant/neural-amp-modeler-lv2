@@ -1,8 +1,8 @@
 # neural-amp-modeler-lv2
 
-Bare-bones implementation of [Neural Amp Modeler](https://github.com/sdatkinson/neural-amp-modeler) (NAM) models in an LV2 plugin.
+LV2 plugin for using neural network machine learning amp models.
 
-**There is no user interface**. Setting the model to use requires that your LV2 host supports atom:Path parameters. Reaper does as of v6.82. Carla and Ardour do. If your favorite LV2 host does not support atom:Path, let them know you want it.
+**There is no custom plugin user interface**. Setting the model to use requires that your LV2 host supports atom:Path parameters. Reaper does as of v6.82. Carla and Ardour do. If your favorite LV2 host does not support atom:Path, let them know you want it.
 If you are looking for a GUI version, @brummer10 [has one here](https://github.com/brummer10/neural-amp-modeler-ui) that works for Linux and Windows. You may also be interested in the the version shipped with the [MOD Desktop App](https://github.com/moddevices/mod-desktop-app), or my digital pedalboard app [Stompbox](https://github.com/mikeoliphant/StompboxUI).
 
 To get the intended behavior, **you must run your audio host at the same sample rate the model was trained at** (usually 48kHz) - no resampling is done by the plugin.
@@ -11,13 +11,15 @@ For amp-only models (the most typical), **you will need to run an impulse repons
 
 ### Models and Performance
 
+The plugin supports both [Neural Amp Modeler (NAM)](https://github.com/sdatkinson/neural-amp-modeler) models and [RTNeural keras json models](https://github.com/jatinchowdhury18/RTNeural) (like those used by [Aida-X](https://github.com/AidaDSP/AIDA-X)).
+
 The best source of models is [ToneHunt](https://tonehunt.org/).
 
-NAM models are generally quite expensive to run. This isn't (much of) an issue on modern PCs, but you may have trouble running on less powerful hardware.
+NAM WaveNet models are generally quite expensive to run. This isn't (much of) an issue on modern PCs, but you may have trouble running on less powerful hardware.
 
 A Raspberry Pi 4 running a 64bit OS can run "standard" NAM models with a bit of room to spare for a cabinet IR and some lightweight effects.
 
-If you are having trouble running a "standard" model, try looking for "feather" (the least expensive) models. You can find a list of ["feather"-tagged models on ToneHunt](https://tonehunt.org/?tags=feather-mdl). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
+If you are having trouble running a "standard" model, try looking for "feather", or even "nano" (the least expensive) models. You can find a list of ["feather"-tagged models on ToneHunt](https://tonehunt.org/models?tags%5B0%5D=feather-mdl). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
 
 ### Building
 
