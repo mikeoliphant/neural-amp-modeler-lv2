@@ -14,8 +14,8 @@
 #include "nam_plugin.h"
 
 // LV2 Functions
-static LV2_Handle instantiate(const LV2_Descriptor*, double rate, const char*, const LV2_Feature* const* features
-) {
+static LV2_Handle instantiate(const LV2_Descriptor*, double rate, const char*, const LV2_Feature* const* features)
+{
 	try
 	{
 		auto nam = std::make_unique<NAM::Plugin>();

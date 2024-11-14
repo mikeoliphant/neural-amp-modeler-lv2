@@ -23,6 +23,19 @@ if (DISABLE_DENORMALS)
 	add_definitions(-DDISABLE_DENORMALS)
 endif (DISABLE_DENORMALS)
 
+option(LSTM_PREFER_NAM "Always use NAM Core for NAM LSTM models" OFF)
+
+if (LSTM_PREFER_NAM)
+	add_definitions(-DLSTM_PREFER_NAM)
+endif (LSTM_PREFER_NAM)
+
+option(WAVENET_PREFER_NAM "Always use NAM Core for NAM WaveNet models" OFF)
+
+if (WAVENET_PREFER_NAM)
+	add_definitions(-DWAVENET_PREFER_NAM)
+endif (WAVENET_PREFER_NAM)
+
+
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
 	option(USE_NATIVE_ARCH "Enable architecture-specific optimizations" OFF)
 
