@@ -115,31 +115,24 @@ namespace NAM {
 						lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
 
 						model = NeuralAudio::NeuralModel::CreateFromFile(msg->path);
-
-						// Pre-run model to ensure all needed buffers are allocated in advance
-						//if (const int32_t numSamples = nam->maxBufferSize)
-						//{
-						//	float* buffer = new float[numSamples];
-						//	memset(buffer, 0, numSamples * sizeof(float));
-
-						//	model->Process(buffer, buffer, numSamples);
-						//	//model->finalize_(numSamples);
-
-						//	delete[] buffer;
-						//}
 					}
 
-					response.model = model;
+					if (model != nullptr)
+					{
+						response.model = model;
 
-					memcpy(response.path, msg->path, pathlen);
+						memcpy(response.path, msg->path, pathlen);
+					}
 				}
 				catch (const std::exception&)
+				{
+				}
+
+				if (model == nullptr)
 				{
 					response.path[0] = '\0';
 
 					lv2_log_error(&nam->logger, "Unable to load model from: '%s'\n", msg->path);
-					
-					//result = LV2_WORKER_ERR_UNKNOWN;
 				}
 
 				respond(handle, sizeof(response), &response);
