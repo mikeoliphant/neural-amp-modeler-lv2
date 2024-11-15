@@ -21,6 +21,8 @@ A Raspberry Pi 4 running a 64bit OS can run "standard" NAM models with a bit of 
 
 If you are having trouble running a "standard" model, try looking for "feather", or even "nano" (the least expensive) models. You can find a list of ["feather"-tagged models on ToneHunt](https://tonehunt.org/models?tags%5B0%5D=feather-mdl). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
 
+For more information on model type support, see the [NeuralAudio](https://github.com/mikeoliphant/NeuralAudio) repository, which is where the model handling code lives.
+
 ### Building
 
 First clone the repository:
@@ -50,3 +52,5 @@ After building, the plugin will be in **build/neural_amp_modeler.lv2**.
 ### Optimization
 
 If you have a relatively modern x64 processor, you can pass "**&#8209;DUSE_NATIVE_ARCH=ON**" on your cmake command line to enable certain processor-specific optimizations.
+
+You can also alter the default model loading behavior with "**&#8209;DLSTM_PREFER_NAM=ON**" (use NAM Core instead of RTNeural for NAM LSTM models) and "**&#8209;DWAVENET_PREFER_NAM=ON**" (use NAM Core instead of RTNeural or NAM WaveNet models).
