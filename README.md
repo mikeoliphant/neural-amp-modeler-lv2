@@ -51,6 +51,6 @@ After building, the plugin will be in **build/neural_amp_modeler.lv2**.
 
 ### Optimization
 
-If you have a relatively modern x64 processor, you can pass "**&#8209;DUSE_NATIVE_ARCH=ON**" on your cmake command line to enable certain processor-specific optimizations.
+If you have a relatively modern x64 processor, you can pass ```-DUSE_NATIVE_ARCH=ON``` on your cmake command line to enable certain processor-specific optimizations.
 
-You can also alter the default model loading behavior with "**&#8209;DLSTM_PREFER_NAM=ON**" (use NAM Core instead of RTNeural for NAM LSTM models) and "**&#8209;DWAVENET_PREFER_NAM=ON**" (use NAM Core instead of RTNeural or NAM WaveNet models).
+You can also alter the default model loading behavior with ```-DLSTM_PREFER_NAM=ON``` (use NAM Core instead of RTNeural for NAM LSTM models) and ```-DWAVENET_PREFER_NAM=ON``` (use NAM Core instead of RTNeural or NAM WaveNet models).
