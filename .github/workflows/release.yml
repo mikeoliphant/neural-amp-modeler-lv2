@@ -58,6 +58,37 @@ jobs:
         asset_path: ./build/neural_amp_modeler_lv2_linux_x64.tgz
         asset_name: neural_amp_modeler_lv2_linux_x64.tgz
         asset_content_type: application/tgz
+
+  build-linux-x64v3:
+    name: Build Linux x64v3
+    needs: create_release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        submodules: recursive
+        
+    - name: Build Plugin
+      working-directory: ${{github.workspace}}/build
+      env:
+        CXX: clang++
+      run: |
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=ON
+        cmake --build . --config $BUILD_TYPE -j4
+
+    - name: Add LV2 Archive
+      working-directory: ${{github.workspace}}/build
+      run: tar -czf neural_amp_modeler_lv2_linux_x64v3.tgz neural_amp_modeler.lv2
+      
+    - name: Upload Plugin Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_path: ./build/neural_amp_modeler_lv2_linux_x64v3.tgz
+        asset_name: neural_amp_modeler_lv2_linux_x64v3.tgz
+        asset_content_type: application/tgz
         
   build-windows:
     name: Build Windows
@@ -75,7 +106,7 @@ jobs:
         cmake --build . --config=release -j4
 
     - name: Add LV2 Archive
-      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination neural_amp_modeler.lv2.zip
+      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination neural_amp_modeler_win_x64.zip
       
     - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
@@ -83,6 +114,34 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./neural_amp_modeler.lv2.zip
-        asset_name: neural_amp_modeler.lv2.zip
+        asset_path: ./neural_amp_modeler_win_x64.zip
+        asset_name: neural_amp_modeler_win_x64.zip
+        asset_content_type: application/zip
+
+  build-windows-x64v3:
+    name: Build Windows x64v3
+    needs: create_release
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        submodules: recursive
+    
+    - name: Build Plugin
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake.exe -G "Visual Studio 17 2022" -A x64 -DUSE_NATIVE_ARCH=ON -T ClangCL ..
+        cmake --build . --config=release -j4
+
+    - name: Add LV2 Archive
+      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination neural_amp_modeler_lv2_win_x64v3.zip
+      
+    - name: Upload Plugin Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_path: ./neural_amp_modeler_lv2_win_x64v3.zip
+        asset_name: neural_amp_modeler_lv2_win_x64v3.zip
         asset_content_type: application/zip
