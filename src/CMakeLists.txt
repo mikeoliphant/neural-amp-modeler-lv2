@@ -48,16 +48,22 @@ if (DISABLE_DENORMALS)
 	add_definitions(-DDISABLE_DENORMALS)
 endif (DISABLE_DENORMALS)
 
-option(LSTM_PREFER_NAM "Always use NAM Core for NAM LSTM models" OFF)
+option(LSTM_PREFER_NAM "Always use NAM Core for NAM LSTM models" ON)
 
 if (LSTM_PREFER_NAM)
 	add_definitions(-DLSTM_PREFER_NAM)
+	message("Using NAM Core for LSTM models")
+else()
+	message("Using RTNeural for LSTM models")
 endif (LSTM_PREFER_NAM)
 
-option(WAVENET_PREFER_NAM "Always use NAM Core for NAM WaveNet models" ON)
+option(WAVENET_PREFER_NAM "Always use NAM Core for NAM WaveNet models" OFF)
 
 if (WAVENET_PREFER_NAM)
 	add_definitions(-DWAVENET_PREFER_NAM)
+	message("Using NAM Core for WaveNet models")
+else()
+	message("Using RTNeural for WaveNet models")
 endif (WAVENET_PREFER_NAM)
 
 set_target_properties(neural_amp_modeler

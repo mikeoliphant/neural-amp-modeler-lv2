@@ -190,6 +190,13 @@ namespace NAM {
 		return LV2_WORKER_SUCCESS;
 	}
 
+	void Plugin::set_max_buffer_size(int size) noexcept
+	{
+		maxBufferSize = size;
+
+		NeuralAudio::NeuralModel::SetDefaultMaxAudioBufferSize(size);
+	}
+
 	void Plugin::process(uint32_t n_samples) noexcept
 	{
 		lv2_atom_forge_set_buffer(&atom_forge, (uint8_t*)ports.notify, ports.notify->atom.size);
@@ -326,7 +333,7 @@ namespace NAM {
 		{
 			if (options[i].key == nam->uris.bufSize_maxBlockLength && options[i].type == nam->uris.atom_Int)
 			{
-				nam->maxBufferSize = *(const int32_t*)options[i].value;
+				nam->set_max_buffer_size(*(const int32_t*)options[i].value);
 				break;
 			}
 		}
