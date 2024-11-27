@@ -106,7 +106,7 @@ jobs:
         cmake --build . --config=release -j4
 
     - name: Add LV2 Archive
-      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination neural_amp_modeler_win_x64.zip
+      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination neural_amp_modeler_lv2_win_x64.zip
       
     - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
@@ -114,8 +114,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./neural_amp_modeler_win_x64.zip
-        asset_name: neural_amp_modeler_win_x64.zip
+        asset_path: ./neural_amp_modeler_lv2_win_x64.zip
+        asset_name: neural_amp_modeler_lv2_win_x64.zip
         asset_content_type: application/zip
 
   build-windows-x64v3:
