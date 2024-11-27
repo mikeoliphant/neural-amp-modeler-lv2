@@ -46,7 +46,7 @@ jobs:
         cmake --build . --config $BUILD_TYPE -j4
 
     - name: Add LV2 Archive
-      run: tar -czf ${{github.workspace}}/build/neural_amp_modeler.lv2 neural_amp_modeler_lv2_linux_x64.tgz
+      run: tar -czf neural_amp_modeler_lv2_linux_x64.tgz ${{github.workspace}}/build/neural_amp_modeler.lv2
       
     - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
