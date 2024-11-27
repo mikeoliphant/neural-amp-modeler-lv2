@@ -55,7 +55,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./neural_amp_modeler_lv2_linux_x64.tgz
+        asset_path: ./build/neural_amp_modeler_lv2_linux_x64.tgz
         asset_name: neural_amp_modeler_lv2_linux_x64.tgz
         asset_content_type: application/tgz
         
