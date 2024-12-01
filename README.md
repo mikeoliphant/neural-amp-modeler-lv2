@@ -23,6 +23,10 @@ If you are having trouble running a "standard" model, try looking for "feather",
 
 For more information on model type support, see the [NeuralAudio](https://github.com/mikeoliphant/NeuralAudio) repository, which is where the model handling code lives.
 
+## Input Calibration
+
+The expected input level to the plugin is 12dBu. For models that include input level information, they will be calibrated against this level. If you know the input level of your audio interface, you should adjust the input level relative to the expected 12dBu to provide the appropriate signal level to the model.
+
 ### Building
 
 First clone the repository:
