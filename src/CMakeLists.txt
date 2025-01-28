@@ -57,7 +57,7 @@ else()
 	message("Using RTNeural for LSTM models")
 endif (LSTM_PREFER_NAM)
 
-option(WAVENET_PREFER_NAM "Always use NAM Core for NAM WaveNet models" OFF)
+option(WAVENET_PREFER_NAM "Always use NAM Core for NAM WaveNet models" ON)
 
 if (WAVENET_PREFER_NAM)
 	add_definitions(-DWAVENET_PREFER_NAM)
