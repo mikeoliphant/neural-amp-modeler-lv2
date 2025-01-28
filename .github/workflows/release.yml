@@ -42,7 +42,7 @@ jobs:
       env:
         CXX: clang++
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLSTM_PREFER_NAM=ON -DWAVENET_PREFER_NAM=ON
         cmake --build . --config $BUILD_TYPE -j4
 
     - name: Add LV2 Archive
@@ -73,7 +73,7 @@ jobs:
       env:
         CXX: clang++
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=ON
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=ON -DLSTM_PREFER_NAM=ON -DWAVENET_PREFER_NAM=ON
         cmake --build . --config $BUILD_TYPE -j4
 
     - name: Add LV2 Archive
@@ -102,7 +102,7 @@ jobs:
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake.exe -G "Visual Studio 17 2022" -A x64  -T ClangCL ..
+        cmake.exe -G "Visual Studio 17 2022" -A x64  -T ClangCL -DLSTM_PREFER_NAM=ON -DWAVENET_PREFER_NAM=ON ..
         cmake --build . --config=release -j4
 
     - name: Add LV2 Archive
@@ -130,7 +130,7 @@ jobs:
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake.exe -G "Visual Studio 17 2022" -A x64 -DUSE_NATIVE_ARCH=ON -T ClangCL ..
+        cmake.exe -G "Visual Studio 17 2022" -A x64 -DUSE_NATIVE_ARCH=ON -DLSTM_PREFER_NAM=ON -DWAVENET_PREFER_NAM=ON -T ClangCL ..
         cmake --build . --config=release -j4
 
     - name: Add LV2 Archive
