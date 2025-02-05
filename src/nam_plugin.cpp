@@ -13,21 +13,21 @@ namespace NAM {
 		// prevent allocations on the audio thread
 		currentModelPath.reserve(MAX_FILE_NAME + 1);
 
-		NeuralAudio::NeuralModel::SetLSTMLoadMode(
-#ifdef LSTM_PREFER_NAM
-			NeuralAudio::PreferNAMCore
-#else
-			NeuralAudio::PreferRTNeural
-#endif
-		);
-
-		NeuralAudio::NeuralModel::SetWaveNetLoadMode(
-#ifdef WAVENET_PREFER_NAM
-			NeuralAudio::PreferNAMCore
-#else
-			NeuralAudio::PreferRTNeural
-#endif
-		);
+//		NeuralAudio::NeuralModel::SetLSTMLoadMode(
+//#ifdef LSTM_PREFER_NAM
+//			NeuralAudio::PreferNAMCore
+//#else
+//			NeuralAudio::PreferRTNeural
+//#endif
+//		);
+//
+//		NeuralAudio::NeuralModel::SetWaveNetLoadMode(
+//#ifdef WAVENET_PREFER_NAM
+//			NeuralAudio::PreferNAMCore
+//#else
+//			NeuralAudio::PreferRTNeural
+//#endif
+		//);
 	}
 
 	Plugin::~Plugin()
