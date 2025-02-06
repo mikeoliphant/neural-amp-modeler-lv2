@@ -1,10 +1,6 @@
-This repository uses code from a number of sources:
+This repository uses code from a number of sources. Please see them for code licensing information:
 
-https://github.com/sdatkinson/NeuralAmpModelerCore
-
-https://gitlab.com/libeigen/eigen
-
-https://github.com/jatinchowdhury18/RTNeural
+https://github.com/mikeoliphant/NeuralAudio
 
 https://github.com/lv2/lv2
 
