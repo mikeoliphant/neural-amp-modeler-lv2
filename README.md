@@ -9,7 +9,7 @@ To get the intended behavior, **you must run your audio host at the same sample 
 
 For amp-only models (the most typical), **you will need to run an impulse reponse after this plugin** to model the cabinet.
 
-### Models and Performance
+## Models and Performance
 
 The plugin supports both [Neural Amp Modeler (NAM)](https://github.com/sdatkinson/neural-amp-modeler) models and [RTNeural keras json models](https://github.com/jatinchowdhury18/RTNeural) (like those used by [Aida-X](https://github.com/AidaDSP/AIDA-X)).
 
@@ -27,7 +27,7 @@ For more information on model type support, see the [NeuralAudio](https://github
 
 The expected input level to the plugin is 12dBu. For models that include input level information, they will be calibrated against this level. If you know the input level of your audio interface, you should adjust the input level relative to the expected 12dBu to provide the appropriate signal level to the model.
 
-### Building
+## Building
 
 First clone the repository:
 ```bash
@@ -53,6 +53,6 @@ Note - you'll have to change the Visual Studio version if you are using a differ
 
 After building, the plugin will be in **build/neural_amp_modeler.lv2**.
 
-### Optimization
+## Optimization
 
 If you have a relatively modern x64 processor, you can pass ```-DUSE_NATIVE_ARCH=ON``` on your cmake command line to enable certain processor-specific optimizations.
