@@ -53,6 +53,8 @@ Note - you'll have to change the Visual Studio version if you are using a differ
 
 After building, the plugin will be in **build/neural_amp_modeler.lv2**.
 
-## Optimization
+## CMake Options
 
-If you have a relatively modern x64 processor, you can pass ```-DUSE_NATIVE_ARCH=ON``` on your cmake command line to enable certain processor-specific optimizations.
+```-DUSE_NATIVE_ARCH=ON```: If you have a relatively modern x64 processor, you can pass ```-DUSE_NATIVE_ARCH=ON``` on your cmake command line to enable certain processor-specific optimizations.
+
+Also see the [NeuralAudio CMake options](https://github.com/mikeoliphant/NeuralAudio#cmake-options) - adding these to your neural-amp-modeler-lv2 cmake will pass them to the NeuralAudio build.
