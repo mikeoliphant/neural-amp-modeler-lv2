@@ -17,7 +17,7 @@ The best source of models is [ToneHunt](https://tonehunt.org/).
 
 NAM WaveNet models are generally quite expensive to run. This isn't (much of) an issue on modern PCs, but you may have trouble running on less powerful hardware.
 
-A Raspberry Pi 4 running a 64bit OS can run "standard" NAM models with a bit of room to spare for a cabinet IR and some lightweight effects.
+A Raspberry Pi 4 running a 64bit OS can run "standard" NAM models with plenty of room to spare for a cabinet IR and some effects. It is also capable of running two "standard" NAM models, but with less headroom for other effects.
 
 If you are having trouble running a "standard" model, try looking for "feather", or even "nano" (the least expensive) models. You can find a list of ["feather"-tagged models on ToneHunt](https://tonehunt.org/models?tags%5B0%5D=feather-mdl). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
 
