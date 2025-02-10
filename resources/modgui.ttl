@@ -1,0 +1,21 @@
+@prefix modgui: <http://moddevices.com/ns/modgui#>.
+@prefix lv2:    <http://lv2plug.in/ns/lv2core#>.
+
+<http://github.com/mikeoliphant/neural-amp-modeler-lv2>
+    modgui:gui [
+        modgui:resourcesDirectory <modgui>;
+        modgui:iconTemplate <modgui/icon-nam.html>;
+        modgui:stylesheet <modgui/stylesheet-nam.css>;
+        modgui:screenshot <modgui/screenshot-nam.png>;
+        modgui:thumbnail <modgui/thumbnail-nam.png>;
+        modgui:discussionURL <https://forum.mod.audio/t/neural-amp-modeler/10112> ;
+        modgui:port [
+            lv2:index 0;
+            lv2:symbol "input_level";
+            lv2:name "Input Lvl";
+        ], [
+            lv2:index 1;
+            lv2:symbol "output_level";
+            lv2:name "Output Lvl";
+        ];
+    ].

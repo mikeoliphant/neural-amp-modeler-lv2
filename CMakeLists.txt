@@ -29,6 +29,9 @@ add_custom_target(copy_binaries ALL
 	DEPENDS neural_amp_modeler
 )
 
+file(COPY resources/modgui.ttl DESTINATION neural_amp_modeler.lv2)
+file(COPY resources/modgui DESTINATION neural_amp_modeler.lv2)
+
 configure_file(resources/manifest.ttl.in neural_amp_modeler.lv2/manifest.ttl)
 configure_file(resources/neural_amp_modeler.ttl.in neural_amp_modeler.lv2/neural_amp_modeler.ttl)
 
