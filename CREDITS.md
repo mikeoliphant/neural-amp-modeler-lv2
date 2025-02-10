@@ -4,4 +4,6 @@ https://github.com/mikeoliphant/NeuralAudio
 
 https://github.com/lv2/lv2
 
-In addition, the CMake structure and LV2 plugin structure are based on code from https://github.com/Dougal-s/Aether.
+The CMake structure and LV2 plugin structure are based on code from https://github.com/Dougal-s/Aether.
+
+modgui user interface is by Roman Brandstetter (@rominator1983) and Filipe Coelho (@falktk) based on design from Evan Heritage.

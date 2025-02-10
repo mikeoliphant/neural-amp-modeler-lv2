@@ -1,0 +1,130 @@
+/* nam */
+
+@import url(/fonts/nexa/stylesheet.css);
+@import url(/fonts/questrial/stylesheet.css);
+
+/* = CONTAINER
+================================================ */
+.mod-pedal-nam {
+    background-position:center center;
+    background-repeat:no-repeat;
+    /* background image is 1121 × 536*/
+    background-size:560px 268px;
+    background-image:url(/resources/background.png{{{ns}}});
+    width:560px;
+    height:268px;
+    position:absolute;
+    border-radius:40px;
+}
+
+/* = BYPASS
+================================================ */
+.mod-pedal-nam .mod-footswitch {
+    background-image:url(/resources/bypass_on.png{{{ns}}});
+    background-position:center center;
+    background-repeat:no-repeat;
+    background-size:82px 47px;
+    width:82px;
+    height:47px;
+    top:132px;
+    left:235px;
+    cursor:pointer;
+    position:absolute;
+}
+.mod-pedal-nam .mod-footswitch.on {
+    background-image:url(/resources/bypass_off.png{{{ns}}});
+}
+
+/* = KNOBS
+================================================ */
+.mod-pedal-nam .mod-control-group {
+    z-index:30;
+    position:relative;
+    margin:0px;
+    padding:0px;
+    display:inline;
+}
+
+.mod-pedal-nam .group1 {
+    top:86px;
+    left:22px;
+}
+
+.mod-pedal-nam .group2 {
+    top:107px;
+    left:78px;
+}
+
+.mod-pedal-nam .mod-control-group .mod-knob .mod-knob-title {
+    text-align: center;
+    color:white;
+}
+
+.mod-pedal-nam .mod-control-group .mod-knob {
+    overflow:hidden;
+    position:relative;
+    display:inline-block;
+}
+
+.mod-pedal-nam .mod-control-group .mod-knob:first-child {
+    margin-left: 0px;
+}
+
+.mod-pedal-nam .mod-control-group .mod-knob:last-child {
+    margin-left: 315px;
+}
+
+.mod-pedal-nam .mod-control-group .mod-knob .mod-knob-image {
+    background-image:url(/resources/knob.png{{{ns}}});
+    background-position:left center;
+    background-repeat:no-repeat;
+    background-size:5000px 100px;
+    height:100px;
+    width:100px;
+    cursor:pointer;
+}
+
+.mod-pedal-nam .mod-enumerated {
+    position: relative;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+
+.mod-pedal-nam .mod-enumerated .mod-enumerated-selected {
+    padding-left: 5px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background-color: transparent;
+    color: white;
+    display: block;
+}
+
+/* THE LIST OF OPTIONS */
+.mod-pedal-nam .mod-enumerated .mod-enumerated-list {
+    background: black;
+    display: none;
+    overflow: auto;
+    position: absolute;
+    padding: 0;
+    width: 405px;
+    height: 220px;
+    border: 2px solid #333;
+}
+
+.mod-pedal-nam .mod-enumerated .mod-enumerated-list > div {
+    padding: 3px 5px;
+}
+
+.mod-pedal-nam .mod-enumerated .mod-enumerated-list > div.selected {
+    background: #333;
+}
+
+.mod-pedal-nam .mod-enumerated .mod-enumerated-list > div:hover {
+    background: #222;
+}
+
+.mod-pedal-nam .mod-enumerated .mod-enumerated-list > div.selected:hover {
+    background: #555;
+}

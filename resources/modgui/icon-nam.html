@@ -1,0 +1,45 @@
+<div class="mod-pedal mod-pedal-nam">
+    <div mod-role="drag-handle" class="mod-drag-handle"></div>
+    <div class="mod-control-group group1 clearfix">
+        {{#controls}}
+        <div class="mod-knob" title="{{name}}">
+            <div class="mod-knob-title">{{name}}</div>
+            <div class="mod-knob-image" mod-role="input-control-port" mod-port-symbol="{{symbol}}"></div>
+        </div>
+        {{/controls}}
+    </div>
+    <div class="mod-footswitch" mod-role="bypass"></div>
+
+    <div class="mod-control-group group2 clearfix">
+        <div class="mod-control-group mod-enumerated-group bottom clearfix">
+            {{#effect.parameters}}
+            {{#path}}
+            <div class="mod-enumerated" mod-role="input-parameter" mod-parameter-uri="{{uri}}" mod-widget="custom-select-path">
+                <div mod-role="input-parameter-value" mod-parameter-uri="{{uri}}" class="mod-enumerated-selected">
+                    -- choose a NAM model --
+                </div>
+                <div class="mod-enumerated-list">
+                    {{#files}}
+                    <div mod-role="enumeration-option" mod-parameter-value="{{fullname}}">{{basename}}</div>
+                    {{/files}}
+                </div>
+            </div>
+            {{/path}}
+            {{/effect.parameters}}
+        </div>
+    </div>
+    <div class="mod-pedal-input">
+        {{#effect.ports.audio.input}}
+        <div class="mod-input mod-input-disconnected" title="{{name}}" mod-role="input-audio-port" mod-port-symbol="{{symbol}}">
+            <div class="mod-pedal-input-image"></div>
+        </div>
+        {{/effect.ports.audio.input}}
+    </div>
+    <div class="mod-pedal-output">
+        {{#effect.ports.audio.output}}
+        <div class="mod-output mod-output-disconnected" title="{{name}}" mod-role="output-audio-port" mod-port-symbol="{{symbol}}">
+            <div class="mod-pedal-output-image"></div>
+        </div>
+        {{/effect.ports.audio.output}}
+    </div>
+</div>
