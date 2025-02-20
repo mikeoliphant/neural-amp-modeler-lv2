@@ -1,4 +1,4 @@
-		if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (MSVC)
 	add_compile_options(
 		"$<$<CONFIG:DEBUG>:/W4>"
 		"$<$<CONFIG:RELEASE>:/O2>"
