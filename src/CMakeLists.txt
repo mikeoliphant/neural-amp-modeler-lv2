@@ -18,8 +18,14 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
 	option(USE_NATIVE_ARCH "Enable architecture-specific optimizations" OFF)
 
 	if (USE_NATIVE_ARCH)
-		add_compile_options(-march=x86-64-v3)
-		message("Enabling -march=x86-64-v3")
+		if (MSVC)
+			add_compile_options(/arch:AVX2)
+			message(STATUS "Enabling /arch:AVX2")
+		 
+		else()
+			add_compile_options(-march=x86-64-v3)
+			message(STATUS "Enabling -march=x86-64-v3")
+		endif()
 	endif (USE_NATIVE_ARCH)
 endif ()
 
