@@ -1,4 +1,4 @@
-if (MSVC)
+		if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(
 		"$<$<CONFIG:DEBUG>:/W4>"
 		"$<$<CONFIG:RELEASE>:/O2>"
@@ -18,7 +18,7 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
 	option(USE_NATIVE_ARCH "Enable architecture-specific optimizations" OFF)
 
 	if (USE_NATIVE_ARCH)
-		if (MSVC)
+		if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 			add_compile_options(/arch:AVX2)
 			message(STATUS "Enabling /arch:AVX2")
 		 
