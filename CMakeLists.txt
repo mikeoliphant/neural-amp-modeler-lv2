@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(NeuralAmpModelerLv2 VERSION 0.1.7)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH "The library install dir (default: lib)")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED OFF)
@@ -36,7 +37,7 @@ configure_file(resources/manifest.ttl.in neural_amp_modeler.lv2/manifest.ttl)
 configure_file(resources/neural_amp_modeler.ttl.in neural_amp_modeler.lv2/neural_amp_modeler.ttl)
 
 install (DIRECTORY ${CMAKE_BINARY_DIR}/neural_amp_modeler.lv2
-       DESTINATION lib/lv2
+       DESTINATION ${LIB_INSTALL_DIR}/lv2
 )
 
 set(CPACK_GENERATOR "DEB")
