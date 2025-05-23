@@ -1,3 +1,5 @@
+[GitHub contributers](https://github.com/mikeoliphant/neural-amp-modeler-lv2/graphs/contributors)
+
 This repository uses code from a number of sources. Please see them for code licensing information:
 
 https://github.com/mikeoliphant/NeuralAudio
