@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(NeuralAmpModelerLv2 VERSION 0.1.7)
+project(NeuralAmpModelerLv2 VERSION 0.1.8)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH "The library install dir (default: lib)")
