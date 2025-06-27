@@ -1,6 +1,6 @@
 # neural-amp-modeler-lv2
 
-LV2 plugin for using neural network machine learning amp models.
+LV2 plugin for neural network machine learning amp model playback using the [NeuralAudio](https://github.com/mikeoliphant/NeuralAudio) engine.
 
 **There is no custom plugin user interface**. Setting the model to use requires that your LV2 host supports atom:Path parameters. Reaper does as of v6.82. Carla and Ardour do. If your favorite LV2 host does not support atom:Path, let them know you want it.
 If you are looking for a GUI version, @brummer10 [has one here](https://github.com/brummer10/neural-amp-modeler-ui) that works for Linux and Windows. You may also be interested in the the version shipped with the [MOD Desktop App](https://github.com/moddevices/mod-desktop-app), or my digital pedalboard app [Stompbox](https://github.com/mikeoliphant/StompboxUI).
@@ -13,13 +13,13 @@ For amp-only models (the most typical), **you will need to run an impulse repons
 
 The plugin supports both [Neural Amp Modeler (NAM)](https://github.com/sdatkinson/neural-amp-modeler) models and [RTNeural keras json models](https://github.com/jatinchowdhury18/RTNeural) (like those used by [Aida-X](https://github.com/AidaDSP/AIDA-X)).
 
-The best source of models is [ToneHunt](https://tonehunt.org/).
+The best source of models is [Tone3000](https://www.tone3000.com/)
 
 NAM WaveNet models are generally quite expensive to run. This isn't (much of) an issue on modern PCs, but you may have trouble running on less powerful hardware.
 
 A Raspberry Pi 4 running a 64bit OS can run "standard" NAM models with plenty of room to spare for a cabinet IR and some effects. It is also capable of running two "standard" NAM models, but with less headroom for other effects.
 
-If you are having trouble running a "standard" model, try looking for "feather", or even "nano" (the least expensive) models. You can find a list of ["feather"-tagged models on ToneHunt](https://tonehunt.org/models?tags%5B0%5D=feather-mdl). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
+If you are having trouble running a "standard" model, try looking for "feather", or even "nano" (the least expensive) models. You can find a list of ["feather"-tagged models on Tone3000](https://www.tone3000.com/search?sizes=feather). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
 
 For more information on model type support, see the [NeuralAudio](https://github.com/mikeoliphant/NeuralAudio) repository, which is where the model handling code lives.
 
