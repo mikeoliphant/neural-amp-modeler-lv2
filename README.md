@@ -13,7 +13,7 @@ For amp-only models (the most typical), **you will need to run an impulse repons
 
 The plugin supports both [Neural Amp Modeler (NAM)](https://github.com/sdatkinson/neural-amp-modeler) models and [RTNeural keras json models](https://github.com/jatinchowdhury18/RTNeural) (like those used by [Aida-X](https://github.com/AidaDSP/AIDA-X)).
 
-The best source of models is [Tone3000](https://www.tone3000.com/)
+The best source of models is [Tone3000](https://www.tone3000.com/).
 
 NAM WaveNet models are generally quite expensive to run. This isn't (much of) an issue on modern PCs, but you may have trouble running on less powerful hardware.
 
