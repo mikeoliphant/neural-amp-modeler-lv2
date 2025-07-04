@@ -9,17 +9,20 @@ To get the intended behavior, **you must run your audio host at the same sample 
 
 For amp-only models (the most typical), **you will need to run an impulse reponse after this plugin** to model the cabinet.
 
-## Models and Performance
+## Models Supported
 
 The plugin supports both [Neural Amp Modeler (NAM)](https://github.com/sdatkinson/neural-amp-modeler) models and [RTNeural keras json models](https://github.com/jatinchowdhury18/RTNeural) (like those used by [Aida-X](https://github.com/AidaDSP/AIDA-X)).
 
 The best source of models is [Tone3000](https://www.tone3000.com/).
 
+For more information on model type support, see the [NeuralAudio](https://github.com/mikeoliphant/NeuralAudio) repository, which is where the model handling code lives.
+
+## Performance
+
 NAM WaveNet models are generally quite expensive to run. This isn't (much of) an issue on modern PCs, but you may have trouble running on less powerful hardware.
 
 If you are having trouble running a "standard" model, try looking for "feather", or even "nano" (the least expensive) models. You can find a list of ["feather"-tagged models on Tone3000](https://www.tone3000.com/search?sizes=feather). Note that tagging models is up to the submitter, so not all "feather" models are tagged as such - you should be able to find more if you dig around.
 
-For more information on model type support, see the [NeuralAudio](https://github.com/mikeoliphant/NeuralAudio) repository, which is where the model handling code lives.
 
 ## Input Calibration
 
