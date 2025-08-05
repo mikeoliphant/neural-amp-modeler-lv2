@@ -9,6 +9,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(A72_OPTIMIZATION "Optimize for cortex-a72/Pi4 (arm64 builds only)" ON)
+option(A76_OPTIMIZATION "Optimize for cortex-a76/Pi5 (arm64 builds only)" OFF)
+
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	include_directories(SYSTEM /usr/local/include)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -18,6 +22,22 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 else()
 	message(FATAL_ERROR "Unrecognized Platform!")
 endif()
+
+# Compiler flags for aarch64 Pi 4/5 optimizations
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" AND (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+
+    set(CMAKE_CXX_FLAGS_RELEASE  "-O3 -ffast-math -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -ffast-math -g -DNDEBUG")
+
+    if (A76_OPTIMIZATION)
+        message(STATUS "Using Cortex-A76/Pi 5 optimizations")
+        add_compile_options("-mcpu=cortex-a76" "-mtune=cortex-a76")
+    elseif (A72_OPTIMIZATION)
+        message(STATUS "Using Cortex-A72/Pi 4 optimizations")
+        add_compile_options("-mcpu=cortex-a72" "-mtune=cortex-a72")
+    endif()
+endif()
+
 
 set(NAM_LV2_ID http://github.com/mikeoliphant/neural-amp-modeler-lv2)
 
