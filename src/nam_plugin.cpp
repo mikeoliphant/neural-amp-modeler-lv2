@@ -234,6 +234,15 @@ namespace NAM {
 			}
 		}
 
+		// Handle bypass (lv2:enabled)
+		const bool bypassed = *(ports.enabled) < 0.5f;
+		if (bypassed)
+		{
+			// When bypassed, just copy input to output
+			std::copy(ports.audio_in, ports.audio_in + n_samples, ports.audio_out);
+			return;
+		}
+
 		float level;
 
 		float modelInputAdjustmentDB = 0;

@@ -28,6 +28,10 @@ If you are having trouble running a "standard" model, try looking for "feather",
 
 The expected input level to the plugin is 12dBu. For models that include input level information, they will be calibrated against this level. If you know the input level of your audio interface, you should adjust the input level relative to the expected 12dBu to provide the appropriate signal level to the model.
 
+## Bypass
+
+The plugin supports the standard LV2 bypass mechanism (`lv2:enabled` designation). When bypassed, the plugin passes audio through unprocessed, avoiding all neural amp processing. Your LV2 host should provide a bypass button or switch that controls this feature automatically.
+
 ## Building
 
 First clone the repository:

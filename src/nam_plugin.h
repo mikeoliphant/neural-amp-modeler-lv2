@@ -60,6 +60,7 @@ namespace NAM {
 			float* audio_out;
 			float* input_level;
 			float* output_level;
+			float* enabled;
 		};
 
 		Ports ports = {};
