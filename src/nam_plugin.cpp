@@ -7,6 +7,10 @@
 
 #define SMOOTH_EPSILON .0001f
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace NAM {
 	Plugin::Plugin()
 	{
@@ -88,6 +92,9 @@ namespace NAM {
 
 		if (options != nullptr)
 			options_set(this, options);
+
+		// Initialize delay buffer for bypass crossfading
+		update_delay_buffer_size();
 
 		return true;
 	}
@@ -195,6 +202,19 @@ namespace NAM {
 		maxBufferSize = size;
 
 		NeuralAudio::NeuralModel::SetDefaultMaxAudioBufferSize(size);
+
+		// Update delay buffer size for bypass crossfading
+		update_delay_buffer_size();
+	}
+
+	void Plugin::update_delay_buffer_size() noexcept
+	{
+		// Size = fade time + host buffer size (which represents the actual latency)
+		size_t fadeTimeSamples = static_cast<size_t>((FADE_TIME_MS / 1000.0) * sampleRate);
+		size_t delayBufferSize = fadeTimeSamples + maxBufferSize;
+
+		inputDelayBuffer.resize(delayBufferSize, 0.0f);
+		delayBufferWritePos = 0;
 	}
 
 	void Plugin::process(uint32_t n_samples) noexcept
@@ -234,13 +254,43 @@ namespace NAM {
 			}
 		}
 
-		// Handle bypass (lv2:enabled)
+		// Handle bypass (lv2:enabled) with smooth crossfading
 		const bool bypassed = *(ports.enabled) < 0.5f;
-		if (bypassed)
+
+		// Detect bypass state change
+		if (bypassed != previousBypassState)
 		{
-			// When bypassed, just copy input to output
+			previousBypassState = bypassed;
+			// Bypass state changed - we'll start/continue fading
+		}
+
+		// Calculate fade increment per sample (for 20ms fade time)
+		const float fadeIncrement = 1.0f / ((FADE_TIME_MS / 1000.0f) * static_cast<float>(sampleRate));
+
+		// Update fade position
+		if (bypassed && bypassFadePosition < 1.0f)
+		{
+			// Fading towards bypass
+			bypassFadePosition = std::min(1.0f, bypassFadePosition + (fadeIncrement * n_samples));
+		}
+		else if (!bypassed && bypassFadePosition > 0.0f)
+		{
+			// Fading towards active processing
+			bypassFadePosition = std::max(0.0f, bypassFadePosition - (fadeIncrement * n_samples));
+		}
+
+		// If fully bypassed and fade is complete, just copy input to output (CPU optimization)
+		if (bypassed && bypassFadePosition >= 1.0f)
+		{
 			std::copy(ports.audio_in, ports.audio_in + n_samples, ports.audio_out);
 			return;
+		}
+
+		// Store input samples in delay buffer for latency compensation
+		for (uint32_t i = 0; i < n_samples; i++)
+		{
+			inputDelayBuffer[delayBufferWritePos] = ports.audio_in[i];
+			delayBufferWritePos = (delayBufferWritePos + 1) % inputDelayBuffer.size();
 		}
 
 		float level;
@@ -311,6 +361,32 @@ namespace NAM {
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				ports.audio_out[i] = ports.audio_out[i] * level;
+			}
+		}
+
+		// Apply bypass crossfade if needed
+		if (bypassFadePosition > 0.0f)
+		{
+			// We're in a bypass fade or fully bypassed (but still processing for fade-out)
+			// Calculate delay read position accounting for latency
+			// Use the host's buffer size as it represents the actual processing latency
+			size_t delayReadPos = (delayBufferWritePos + inputDelayBuffer.size() - maxBufferSize - n_samples) % inputDelayBuffer.size();
+
+			for (uint32_t i = 0; i < n_samples; i++)
+			{
+				// Get delayed dry input
+				float dryInput = inputDelayBuffer[delayReadPos];
+				delayReadPos = (delayReadPos + 1) % inputDelayBuffer.size();
+
+				// Calculate per-sample fade position for smooth transition
+				float currentFade = bypassFadePosition;
+
+				// Crossfade: fade out processed, fade in dry
+				// Use equal-power crossfade for smooth transition
+				float wetGain = std::cos(currentFade * M_PI * 0.5f); // processed output
+				float dryGain = std::sin(currentFade * M_PI * 0.5f); // dry input
+
+				ports.audio_out[i] = (ports.audio_out[i] * wetGain) + (dryInput * dryGain);
 			}
 		}
 
@@ -459,9 +535,9 @@ namespace NAM {
 		if (result == LV2_STATE_SUCCESS)
 		{
 			// Schedule model to be loaded by the provided worker
+			// Note: currentModelPath will be updated in work_response() on the RT thread
+			// to avoid race conditions with process() reading it
 			nam->schedule->schedule_work(nam->schedule->handle, sizeof(msg), &msg);
-
-			nam->currentModelPath = msg.path;
 		}
 
 		return result;

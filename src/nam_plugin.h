@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <random>
 #include <string_view>
+#include <vector>
 
 // LV2
 #include <lv2/core/lv2.h>
@@ -76,6 +77,13 @@ namespace NAM {
 		float prevDCInput = 0;
 		float prevDCOutput = 0;
 
+		// Bypass crossfade state
+		bool previousBypassState = false;
+		float bypassFadePosition = 0.0f;  // 0.0 = fully processed, 1.0 = fully bypassed
+		std::vector<float> inputDelayBuffer;
+		size_t delayBufferWritePos = 0;
+		static constexpr size_t FADE_TIME_MS = 20;
+
 		Plugin();
 		~Plugin();
 
@@ -121,5 +129,7 @@ namespace NAM {
 		float inputLevel = 0;
 		float outputLevel = 0;
 		int32_t maxBufferSize = 512;
+
+		void update_delay_buffer_size() noexcept;
 	};
 }
