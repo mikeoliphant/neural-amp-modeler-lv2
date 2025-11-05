@@ -83,6 +83,8 @@ namespace NAM {
 		std::vector<float> inputDelayBuffer;
 		size_t delayBufferWritePos = 0;
 		static constexpr size_t FADE_TIME_MS = 20;
+		static constexpr size_t WARMUP_TIME_MS = 40; // 2x fade time for model warmup
+		size_t warmupSamplesRemaining = 0;
 
 		Plugin();
 		~Plugin();

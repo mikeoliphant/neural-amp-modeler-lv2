@@ -261,7 +261,19 @@ namespace NAM {
 		if (bypassed != previousBypassState)
 		{
 			previousBypassState = bypassed;
-			// Bypass state changed - we'll start/continue fading
+
+			// When transitioning from bypassed to active, start warmup period
+			if (!bypassed)
+			{
+				warmupSamplesRemaining = static_cast<size_t>((WARMUP_TIME_MS / 1000.0) * sampleRate);
+			}
+		}
+
+		// If fully bypassed and not warming up, just copy input to output (CPU optimization)
+		if (bypassed && bypassFadePosition >= 1.0f)
+		{
+			std::copy(ports.audio_in, ports.audio_in + n_samples, ports.audio_out);
+			return;
 		}
 
 		// Calculate fade increment per sample (for 20ms fade time)
@@ -275,15 +287,19 @@ namespace NAM {
 		}
 		else if (!bypassed && bypassFadePosition > 0.0f)
 		{
-			// Fading towards active processing
-			bypassFadePosition = std::max(0.0f, bypassFadePosition - (fadeIncrement * n_samples));
-		}
-
-		// If fully bypassed and fade is complete, just copy input to output (CPU optimization)
-		if (bypassed && bypassFadePosition >= 1.0f)
-		{
-			std::copy(ports.audio_in, ports.audio_in + n_samples, ports.audio_out);
-			return;
+			// During warmup, hold at full bypass to let model process and stabilize
+			if (warmupSamplesRemaining > 0)
+			{
+				// Keep outputting 100% dry signal during warmup
+				bypassFadePosition = 1.0f;
+				warmupSamplesRemaining = (warmupSamplesRemaining > n_samples) ?
+					(warmupSamplesRemaining - n_samples) : 0;
+			}
+			else
+			{
+				// Warmup complete, start fading towards active processing
+				bypassFadePosition = std::max(0.0f, bypassFadePosition - (fadeIncrement * n_samples));
+			}
 		}
 
 		// Store input samples in delay buffer for latency compensation
