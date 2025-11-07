@@ -222,6 +222,12 @@ namespace NAM {
 		delayBufferWritePos = 0;
 	}
 
+	// GCC-specific optimizations for the audio processing hot path
+	__attribute__((hot))
+	__attribute__((optimize("tree-vectorize", "O3", "fp-contract=fast")))
+	#if defined(__x86_64__) || defined(__amd64__)
+	__attribute__((target("sse4.2,avx,avx2,fma")))
+	#endif
 	void Plugin::process(uint32_t n_samples) noexcept
 	{
 		lv2_atom_forge_set_buffer(&atom_forge, (uint8_t*)ports.notify, ports.notify->atom.size);
@@ -313,12 +319,9 @@ namespace NAM {
 		}
 
 		// Cache pointers for better optimization and hint alignment for SIMD
-		const float* __restrict in = ports.audio_in;
-		float* __restrict out = ports.audio_out;
-
-		// Assume alignment for better SIMD code generation (common for audio buffers)
-		in = (const float*)__builtin_assume_aligned(in, 16);
-		out = (float*)__builtin_assume_aligned(out, 16);
+		// GCC will use these hints for vectorization
+		const float* __restrict in = (const float*)__builtin_assume_aligned(ports.audio_in, 16);
+		float* __restrict out = (float*)__builtin_assume_aligned(ports.audio_out, 16);
 
 		// Store input samples in delay buffer for latency compensation
 		const size_t delaySize = inputDelayBuffer.size();
@@ -366,9 +369,9 @@ namespace NAM {
 		{
 			level = inputLevel = desiredInputLevel;
 
-			// Constant gain - perfectly vectorizable
+			// Constant gain - perfectly vectorizable with GCC
 			#pragma GCC ivdep
-			#pragma clang loop vectorize(enable) interleave(enable)
+			#pragma GCC unroll 8
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				out[i] = in[i] * level;
@@ -407,9 +410,9 @@ namespace NAM {
 		{
 			level = outputLevel = desiredOutputLevel;
 
-			// Constant gain - perfectly vectorizable
+			// Constant gain - perfectly vectorizable with GCC
 			#pragma GCC ivdep
-			#pragma clang loop vectorize(enable) interleave(enable)
+			#pragma GCC unroll 8
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				out[i] = out[i] * level;
@@ -432,12 +435,12 @@ namespace NAM {
 
 			if (gainDiff < 0.0001f)
 			{
-				// Gain is constant - this loop is fully vectorizable
+				// Gain is constant - this loop is fully vectorizable with GCC
 				const float dryGain = targetGain;
 				const float wetGain = 1.0f - dryGain;
 
 				#pragma GCC ivdep
-				#pragma clang loop vectorize(enable) interleave(enable)
+				#pragma GCC unroll 4
 				for (uint32_t i = 0; i < n_samples; i++)
 				{
 					const float dryInput = inputDelayBuffer[(delayReadPos + i) % delaySize];
