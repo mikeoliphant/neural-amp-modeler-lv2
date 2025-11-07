@@ -96,6 +96,11 @@ namespace NAM {
 		// Initialize delay buffer for bypass crossfading
 		update_delay_buffer_size();
 
+		// Pre-calculate fade coefficients
+		fadeIncrement = 1.0f / ((FADE_TIME_MS / 1000.0f) * static_cast<float>(sampleRate));
+		smoothingCoeff = fadeIncrement * 10.0f;
+		warmupSamplesTotal = static_cast<size_t>((WARMUP_TIME_MS / 1000.0) * sampleRate);
+
 		return true;
 	}
 
@@ -273,7 +278,7 @@ namespace NAM {
 			// When transitioning from bypassed to active, start warmup period
 			if (!bypassed)
 			{
-				warmupSamplesRemaining = static_cast<size_t>((WARMUP_TIME_MS / 1000.0) * sampleRate);
+				warmupSamplesRemaining = warmupSamplesTotal;
 			}
 		}
 
@@ -284,14 +289,7 @@ namespace NAM {
 			return;
 		}
 
-		// Calculate fade increment per sample (for 20ms fade time)
-		const float fadeIncrement = 1.0f / ((FADE_TIME_MS / 1000.0f) * static_cast<float>(sampleRate));
-
-		// Calculate 1st order LPF coefficient for smooth transitions
-		// This creates a time constant roughly matching the fade time
-		const float smoothingCoeff = fadeIncrement * 10.0f; // Adjust multiplier for desired smoothness
-
-		// Update fade position
+		// Update fade position (using pre-calculated fadeIncrement)
 		if (bypassed && bypassFadePosition < 1.0f)
 		{
 			// Fading towards bypass
@@ -314,12 +312,20 @@ namespace NAM {
 			}
 		}
 
+		// Cache pointers for better optimization
+		const float* __restrict in = ports.audio_in;
+		float* __restrict out = ports.audio_out;
+
 		// Store input samples in delay buffer for latency compensation
+		const size_t delaySize = inputDelayBuffer.size();
+		size_t writePos = delayBufferWritePos;
 		for (uint32_t i = 0; i < n_samples; i++)
 		{
-			inputDelayBuffer[delayBufferWritePos] = ports.audio_in[i];
-			delayBufferWritePos = (delayBufferWritePos + 1) % inputDelayBuffer.size();
+			inputDelayBuffer[writePos] = in[i];
+			writePos++;
+			if (writePos >= delaySize) writePos = 0;  // Faster than modulo
 		}
+		delayBufferWritePos = writePos;
 
 		float level;
 
@@ -339,9 +345,9 @@ namespace NAM {
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				// do very basic smoothing
-				level = (.99f * level) + (.01f * desiredInputLevel);
+				level = (LEVEL_SMOOTH_A * level) + (LEVEL_SMOOTH_B * desiredInputLevel);
 
-				ports.audio_out[i] = ports.audio_in[i] * level;
+				out[i] = in[i] * level;
 			}
 
 			inputLevel = level;
@@ -352,7 +358,7 @@ namespace NAM {
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				ports.audio_out[i] = ports.audio_in[i] * level;
+				out[i] = in[i] * level;
 			}
 		}
 
@@ -360,7 +366,7 @@ namespace NAM {
 
 		if (currentModel != nullptr)
 		{
-			currentModel->Process(ports.audio_out, ports.audio_out, n_samples);
+			currentModel->Process(out, out, n_samples);
 
 			modelLoudnessAdjustmentDB = currentModel->GetRecommendedOutputDBAdjustment();
 		}
@@ -375,9 +381,9 @@ namespace NAM {
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				// do very basic smoothing
-				level = (.99f * level) + (.01f * desiredOutputLevel);
+				level = (LEVEL_SMOOTH_A * level) + (LEVEL_SMOOTH_B * desiredOutputLevel);
 
-				ports.audio_out[i] = ports.audio_out[i] * outputLevel;
+				out[i] = out[i] * level;  // FIXED: was using outputLevel instead of level
 			}
 
 			outputLevel = level;
@@ -388,7 +394,7 @@ namespace NAM {
 
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
-				ports.audio_out[i] = ports.audio_out[i] * level;
+				out[i] = out[i] * level;
 			}
 		}
 
@@ -398,24 +404,30 @@ namespace NAM {
 			// We're in a bypass fade or fully bypassed (but still processing for fade-out)
 			// Calculate delay read position accounting for latency
 			// Use the host's buffer size as it represents the actual processing latency
-			size_t delayReadPos = (delayBufferWritePos + inputDelayBuffer.size() - maxBufferSize - n_samples) % inputDelayBuffer.size();
+			size_t delayReadPos = (delayBufferWritePos + delaySize - maxBufferSize - n_samples) % delaySize;
+
+			// Cache commonly used values
+			float smoothGain = smoothBypassGain;
+			const float targetGain = bypassFadePosition;
+			const float coeff = smoothingCoeff;
 
 			for (uint32_t i = 0; i < n_samples; i++)
 			{
 				// Get delayed dry input
-				float dryInput = inputDelayBuffer[delayReadPos];
-				delayReadPos = (delayReadPos + 1) % inputDelayBuffer.size();
+				const float dryInput = inputDelayBuffer[delayReadPos];
+				delayReadPos++;
+				if (delayReadPos >= delaySize) delayReadPos = 0;  // Faster than modulo
 
 				// Update smooth bypass gain using 1st order LPF per sample
-				// Smoothly approach the target bypass position
-				smoothBypassGain += smoothingCoeff * (bypassFadePosition - smoothBypassGain);
+				smoothGain += coeff * (targetGain - smoothGain);
 
 				// Linear crossfade: fade out processed, fade in dry
-				float wetGain = 1.0f - smoothBypassGain; // processed output
-				float dryGain = smoothBypassGain;        // dry input
+				const float wetGain = 1.0f - smoothGain;
 
-				ports.audio_out[i] = (ports.audio_out[i] * wetGain) + (dryInput * dryGain);
+				out[i] = (out[i] * wetGain) + (dryInput * smoothGain);
 			}
+
+			smoothBypassGain = smoothGain;
 		}
 
 		//float dcBlockCoefficient = 1 - (220.0 / sampleRate);

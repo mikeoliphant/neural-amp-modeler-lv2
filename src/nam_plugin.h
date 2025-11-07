@@ -88,6 +88,15 @@ namespace NAM {
 		static constexpr size_t WARMUP_TIME_MS = 40; // 2x fade time for model warmup
 		size_t warmupSamplesRemaining = 0;
 
+		// Pre-calculated coefficients (set in initialize())
+		float fadeIncrement = 0.0f;
+		float smoothingCoeff = 0.0f;
+		size_t warmupSamplesTotal = 0;
+
+		// Smoothing coefficients for level adjustments
+		static constexpr float LEVEL_SMOOTH_A = 0.99f;
+		static constexpr float LEVEL_SMOOTH_B = 0.01f;
+
 		Plugin();
 		~Plugin();
 
