@@ -312,13 +312,20 @@ namespace NAM {
 			}
 		}
 
-		// Cache pointers for better optimization
+		// Cache pointers for better optimization and hint alignment for SIMD
 		const float* __restrict in = ports.audio_in;
 		float* __restrict out = ports.audio_out;
+
+		// Assume alignment for better SIMD code generation (common for audio buffers)
+		in = (const float*)__builtin_assume_aligned(in, 16);
+		out = (float*)__builtin_assume_aligned(out, 16);
 
 		// Store input samples in delay buffer for latency compensation
 		const size_t delaySize = inputDelayBuffer.size();
 		size_t writePos = delayBufferWritePos;
+
+		// Memory copy loop - can be optimized by compiler
+		#pragma GCC ivdep
 		for (uint32_t i = 0; i < n_samples; i++)
 		{
 			inputDelayBuffer[writePos] = in[i];
@@ -342,6 +349,9 @@ namespace NAM {
 		if (fabs(desiredInputLevel - inputLevel) > SMOOTH_EPSILON)
 		{
 			level = inputLevel;
+
+			// Process smoothing - recurrence prevents full SIMD but compiler can still optimize
+			#pragma GCC ivdep
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				// do very basic smoothing
@@ -356,6 +366,9 @@ namespace NAM {
 		{
 			level = inputLevel = desiredInputLevel;
 
+			// Constant gain - perfectly vectorizable
+			#pragma GCC ivdep
+			#pragma clang loop vectorize(enable) interleave(enable)
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				out[i] = in[i] * level;
@@ -378,6 +391,8 @@ namespace NAM {
 		{
 			level = outputLevel;
 
+			// Process smoothing - recurrence prevents full SIMD but compiler can still optimize
+			#pragma GCC ivdep
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				// do very basic smoothing
@@ -392,6 +407,9 @@ namespace NAM {
 		{
 			level = outputLevel = desiredOutputLevel;
 
+			// Constant gain - perfectly vectorizable
+			#pragma GCC ivdep
+			#pragma clang loop vectorize(enable) interleave(enable)
 			for (unsigned int i = 0; i < n_samples; i++)
 			{
 				out[i] = out[i] * level;
@@ -406,28 +424,51 @@ namespace NAM {
 			// Use the host's buffer size as it represents the actual processing latency
 			size_t delayReadPos = (delayBufferWritePos + delaySize - maxBufferSize - n_samples) % delaySize;
 
-			// Cache commonly used values
-			float smoothGain = smoothBypassGain;
 			const float targetGain = bypassFadePosition;
 			const float coeff = smoothingCoeff;
 
-			for (uint32_t i = 0; i < n_samples; i++)
+			// Check if gain is essentially constant (finished smoothing)
+			const float gainDiff = fabs(targetGain - smoothBypassGain);
+
+			if (gainDiff < 0.0001f)
 			{
-				// Get delayed dry input
-				const float dryInput = inputDelayBuffer[delayReadPos];
-				delayReadPos++;
-				if (delayReadPos >= delaySize) delayReadPos = 0;  // Faster than modulo
+				// Gain is constant - this loop is fully vectorizable
+				const float dryGain = targetGain;
+				const float wetGain = 1.0f - dryGain;
 
-				// Update smooth bypass gain using 1st order LPF per sample
-				smoothGain += coeff * (targetGain - smoothGain);
+				#pragma GCC ivdep
+				#pragma clang loop vectorize(enable) interleave(enable)
+				for (uint32_t i = 0; i < n_samples; i++)
+				{
+					const float dryInput = inputDelayBuffer[(delayReadPos + i) % delaySize];
+					out[i] = (out[i] * wetGain) + (dryInput * dryGain);
+				}
 
-				// Linear crossfade: fade out processed, fade in dry
-				const float wetGain = 1.0f - smoothGain;
-
-				out[i] = (out[i] * wetGain) + (dryInput * smoothGain);
+				smoothBypassGain = targetGain;
 			}
+			else
+			{
+				// Gain is changing - process with smoothing
+				float smoothGain = smoothBypassGain;
 
-			smoothBypassGain = smoothGain;
+				for (uint32_t i = 0; i < n_samples; i++)
+				{
+					// Get delayed dry input
+					const float dryInput = inputDelayBuffer[delayReadPos];
+					delayReadPos++;
+					if (delayReadPos >= delaySize) delayReadPos = 0;
+
+					// Update smooth bypass gain using 1st order LPF per sample
+					smoothGain += coeff * (targetGain - smoothGain);
+
+					// Linear crossfade: fade out processed, fade in dry
+					const float wetGain = 1.0f - smoothGain;
+
+					out[i] = (out[i] * wetGain) + (dryInput * smoothGain);
+				}
+
+				smoothBypassGain = smoothGain;
+			}
 		}
 
 		//float dcBlockCoefficient = 1 - (220.0 / sampleRate);
