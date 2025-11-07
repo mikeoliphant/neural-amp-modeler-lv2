@@ -287,6 +287,10 @@ namespace NAM {
 		// Calculate fade increment per sample (for 20ms fade time)
 		const float fadeIncrement = 1.0f / ((FADE_TIME_MS / 1000.0f) * static_cast<float>(sampleRate));
 
+		// Calculate 1st order LPF coefficient for smooth transitions
+		// This creates a time constant roughly matching the fade time
+		const float smoothingCoeff = fadeIncrement * 10.0f; // Adjust multiplier for desired smoothness
+
 		// Update fade position
 		if (bypassed && bypassFadePosition < 1.0f)
 		{
@@ -402,13 +406,13 @@ namespace NAM {
 				float dryInput = inputDelayBuffer[delayReadPos];
 				delayReadPos = (delayReadPos + 1) % inputDelayBuffer.size();
 
-				// Calculate per-sample fade position for smooth transition
-				float currentFade = bypassFadePosition;
+				// Update smooth bypass gain using 1st order LPF per sample
+				// Smoothly approach the target bypass position
+				smoothBypassGain += smoothingCoeff * (bypassFadePosition - smoothBypassGain);
 
-				// Crossfade: fade out processed, fade in dry
-				// Use equal-power crossfade for smooth transition
-				float wetGain = std::cos(currentFade * M_PI * 0.5f); // processed output
-				float dryGain = std::sin(currentFade * M_PI * 0.5f); // dry input
+				// Linear crossfade: fade out processed, fade in dry
+				float wetGain = 1.0f - smoothBypassGain; // processed output
+				float dryGain = smoothBypassGain;        // dry input
 
 				ports.audio_out[i] = (ports.audio_out[i] * wetGain) + (dryInput * dryGain);
 			}

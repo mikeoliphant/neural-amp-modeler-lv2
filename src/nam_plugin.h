@@ -81,6 +81,7 @@ namespace NAM {
 		// Bypass crossfade state
 		bool previousBypassState = false;
 		float bypassFadePosition = 0.0f;  // 0.0 = fully processed, 1.0 = fully bypassed
+		float smoothBypassGain = 0.0f;    // Smoothed gain for 1st order LPF
 		std::vector<float> inputDelayBuffer;
 		size_t delayBufferWritePos = 0;
 		static constexpr size_t FADE_TIME_MS = 20;
