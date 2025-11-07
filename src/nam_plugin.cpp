@@ -222,6 +222,14 @@ namespace NAM {
 		lv2_atom_forge_set_buffer(&atom_forge, (uint8_t*)ports.notify, ports.notify->atom.size);
 		lv2_atom_forge_sequence_head(&atom_forge, &sequence_frame, uris.units_frame);
 
+		// Handle hard bypass - completely skip all processing
+		const bool hardBypassed = *(ports.hard_bypass) >= 0.5f;
+		if (hardBypassed)
+		{
+			std::copy(ports.audio_in, ports.audio_in + n_samples, ports.audio_out);
+			return;
+		}
+
 		LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
 		{
 			if (event->body.type == uris.atom_Object)

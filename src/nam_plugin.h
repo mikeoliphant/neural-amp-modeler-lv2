@@ -62,6 +62,7 @@ namespace NAM {
 			float* input_level;
 			float* output_level;
 			float* enabled;
+			float* hard_bypass;
 		};
 
 		Ports ports = {};
