@@ -316,10 +316,9 @@ namespace NAM {
 			}
 		}
 
-		// Cache pointers for better optimization and hint alignment for SIMD
-		// GCC will use these hints for vectorization
-		const float* __restrict in = (const float*)__builtin_assume_aligned(ports.audio_in, 16);
-		float* __restrict out = (float*)__builtin_assume_aligned(ports.audio_out, 16);
+		// Cache pointers for better optimization
+		const float* __restrict in = ports.audio_in;
+		float* __restrict out = ports.audio_out;
 
 		// Store input samples in delay buffer for latency compensation
 		const size_t delaySize = inputDelayBuffer.size();
