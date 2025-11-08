@@ -139,8 +139,8 @@ namespace NAM {
 		LV2_Atom_Forge atom_forge = {};
 		LV2_Atom_Forge_Frame sequence_frame;
 
-		float inputLevel = 0;
-		float outputLevel = 0;
+		float inputLevel = 1.0f;  // Initialize to unity gain to avoid silence on startup
+		float outputLevel = 1.0f;  // Initialize to unity gain to avoid silence on startup
 		int32_t maxBufferSize = 512;
 
 		void update_delay_buffer_size() noexcept;
