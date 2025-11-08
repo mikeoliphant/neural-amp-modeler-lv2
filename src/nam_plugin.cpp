@@ -233,14 +233,6 @@ namespace NAM {
 		lv2_atom_forge_set_buffer(&atom_forge, (uint8_t*)ports.notify, ports.notify->atom.size);
 		lv2_atom_forge_sequence_head(&atom_forge, &sequence_frame, uris.units_frame);
 
-		// Handle hard bypass - completely skip all processing
-		const bool hardBypassed = *(ports.hard_bypass) >= 0.5f;
-		if (hardBypassed)
-		{
-			std::copy(ports.audio_in, ports.audio_in + n_samples, ports.audio_out);
-			return;
-		}
-
 		LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
 		{
 			if (event->body.type == uris.atom_Object)
@@ -275,6 +267,7 @@ namespace NAM {
 
 		// Handle bypass (lv2:enabled) with smooth crossfading
 		const bool bypassed = *(ports.enabled) < 0.5f;
+		const bool hardBypassed = *(ports.hard_bypass) >= 0.5f;
 
 		// Detect bypass state change
 		if (bypassed != previousBypassState)
@@ -288,12 +281,17 @@ namespace NAM {
 			}
 		}
 
-		// If fully bypassed and not warming up, just copy input to output (CPU optimization)
-		if (bypassed && bypassFadePosition >= 1.0f)
+		// Hard bypass mode: only engages after soft bypass fade is complete
+		// This ensures smooth transitions while maximizing CPU savings in steady-state bypass
+		if (bypassed && hardBypassed && bypassFadePosition >= 1.0f)
 		{
+			// Fully bypassed with hard bypass enabled - skip ALL processing
 			std::copy(ports.audio_in, ports.audio_in + n_samples, ports.audio_out);
 			return;
 		}
+
+		// Note: Soft bypass (bypassed && !hardBypassed) continues processing below
+		// This maintains constant CPU load to prevent audio glitches from sudden load changes
 
 		// Update fade position (using pre-calculated fadeIncrement)
 		if (bypassed && bypassFadePosition < 1.0f)
