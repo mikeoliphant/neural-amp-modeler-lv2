@@ -29,8 +29,8 @@
 	doap:license <http://opensource.org/licenses/gpl-3-0>;
 
 	doap:maintainer [
-		foaf:name "Mike Oliphant";
-		foaf:homepage <http://github.com/mikeoliphant>;
+		foaf:name "Frederick Price";
+		foaf:homepage <http://github.com/rickprice>;
 	];
 
 	lv2:requiredFeature urid:map, work:schedule;
