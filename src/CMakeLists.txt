@@ -57,9 +57,14 @@ endif (DISABLE_DENORMALS)
 set_target_properties(neural_amp_modeler
 	PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
+	C_VISIBILITY_PRESET hidden
+	VISIBILITY_INLINES_HIDDEN ON
 	INTERPROCEDURAL_OPTIMIZATION TRUE
 	PREFIX ""
 )
+
+# Use version script to only export lv2_descriptor symbol
+target_link_options(neural_amp_modeler PRIVATE "-Wl,--version-script=${CMAKE_SOURCE_DIR}/lv2_symbol_export.version")
 
 # Platform
 
