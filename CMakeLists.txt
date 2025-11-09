@@ -19,7 +19,7 @@ else()
 	message(FATAL_ERROR "Unrecognized Platform!")
 endif()
 
-set(NAM_LV2_ID http://github.com/mikeoliphant/neural-amp-modeler-lv2)
+set(NAM_LV2_ID http://github.com/rickprice/neural-amp-modeler-bypass-lv2)
 
 add_subdirectory(src)
 
@@ -41,10 +41,10 @@ install (DIRECTORY ${CMAKE_BINARY_DIR}/neural_amp_modeler.lv2
 )
 
 set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "oliphant@nostatic.org>")
-set(CPACK_PACKAGE_VENDOR "Mike Oliphant")
-set(CPACK_PACKAGE_DESCRIPTION "Neural Amp Modeler LV2 plugin implementation")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neural Amp Modeler LV2 plugin")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "fprice@pricemail.ca")
+set(CPACK_PACKAGE_VENDOR "Frederick Price")
+set(CPACK_PACKAGE_DESCRIPTION "Neural Amp Modeler LV2 plugin implementation with bypass functionality")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neural Amp Modeler LV2 plugin with bypass")
 set(CPACK_DEBIAN_PACKAGE_SECTION sound)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
