@@ -54,6 +54,12 @@ if (DISABLE_DENORMALS)
 	add_definitions(-DDISABLE_DENORMALS)
 endif (DISABLE_DENORMALS)
 
+option(SMART_BYPASS_ENABLED "Enable auto-bypass on silence" OFF)
+
+if (SMART_BYPASS_ENABLED)
+	add_definitions(-DSMART_BYPASS_ENABLED)
+endif (SMART_BYPASS_ENABLED)
+
 set_target_properties(neural_amp_modeler
 	PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
