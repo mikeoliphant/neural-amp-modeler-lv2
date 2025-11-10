@@ -120,5 +120,8 @@ namespace NAM {
 		float inputLevel = 0;
 		float outputLevel = 0;
 		int32_t maxBufferSize = 512;
+		float bypassThresholdLinear = 0;
+		uint32_t silentSamples = 0;
+		bool smartBypassed = false;
 	};
 }
