@@ -187,8 +187,17 @@ namespace NAM {
 		nam->currentModelPath = msg->path;
 		assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1);
 
-		nam->silentSamples = 0;
-		nam->smartBypassed = false;
+		if (nam->currentModel != nullptr)
+		{
+			int receptiveFieldSize = nam->currentModel->GetReceptiveFieldSize();
+
+			if (receptiveFieldSize > -1)
+			{
+				// A newly loaded model is prewarmed to have a silent sample history
+				nam->silentSamples = receptiveFieldSize;
+				nam->smartBypassed = true;
+			}
+		}
 
 		// send reply
 		nam->schedule->schedule_work(nam->schedule->handle, sizeof(reply), &reply);
@@ -268,8 +277,10 @@ namespace NAM {
 					}
 				}
 
-				if (silentSamples > (uint32_t)receptiveFieldSamples)
+				if (silentSamples >= (uint32_t)receptiveFieldSamples)
 				{
+					silentSamples = (uint32_t)receptiveFieldSamples;	// Prevent silentSamples growing and eventually overflowing uint32
+
 					if (smartBypassed)
 					{
 						for (unsigned int i = 0; i < n_samples; i++)
