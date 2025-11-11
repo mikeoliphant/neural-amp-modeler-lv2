@@ -7,11 +7,17 @@
 
 #define SMOOTH_EPSILON .0001f
 
+#ifndef BYPASS_DB_THRESHOLD
+#define BYPASS_DB_THRESHOLD -100
+#endif
+
 namespace NAM {
 	Plugin::Plugin()
 	{
 		// prevent allocations on the audio thread
 		currentModelPath.reserve(MAX_FILE_NAME + 1);
+
+		bypassThresholdLinear = powf(10, BYPASS_DB_THRESHOLD * 0.05f);
 
 //		NeuralAudio::NeuralModel::SetLSTMLoadMode(
 //#ifdef LSTM_PREFER_NAM
@@ -181,6 +187,18 @@ namespace NAM {
 		nam->currentModelPath = msg->path;
 		assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1);
 
+		if (nam->currentModel != nullptr)
+		{
+			int receptiveFieldSize = nam->currentModel->GetReceptiveFieldSize();
+
+			if (receptiveFieldSize > -1)
+			{
+				// A newly loaded model is prewarmed to have a silent sample history
+				nam->silentSamples = receptiveFieldSize;
+				nam->smartBypassed = true;
+			}
+		}
+
 		// send reply
 		nam->schedule->schedule_work(nam->schedule->handle, sizeof(reply), &reply);
 
@@ -241,6 +259,44 @@ namespace NAM {
 		if (currentModel != nullptr)
 		{
 			modelInputAdjustmentDB = currentModel->GetRecommendedInputDBAdjustment();
+
+#ifdef SMART_BYPASS_ENABLED
+			int receptiveFieldSamples = currentModel->GetReceptiveFieldSize();
+
+			if (receptiveFieldSamples > -1)
+			{
+				for (unsigned int i = 0; i < n_samples; i++)
+				{
+					if (abs(ports.audio_in[i]) <= bypassThresholdLinear)
+					{
+						silentSamples++;
+					}
+					else
+					{
+						silentSamples = 0;
+					}
+				}
+
+				if (silentSamples >= (uint32_t)receptiveFieldSamples)
+				{
+					silentSamples = (uint32_t)receptiveFieldSamples;	// Prevent silentSamples growing and eventually overflowing uint32
+
+					if (smartBypassed)
+					{
+						for (unsigned int i = 0; i < n_samples; i++)
+						{
+							ports.audio_out[i] = ports.audio_in[i];
+						}
+
+						return;
+					}
+
+					smartBypassed = true; // If we aren't already, we'll be bypassed on the next process call
+				}
+				else
+					smartBypassed = false;
+			}
+#endif
 		}
 
 		// convert input level from db

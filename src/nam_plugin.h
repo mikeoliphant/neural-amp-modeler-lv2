@@ -80,6 +80,7 @@ namespace NAM {
 
 		bool initialize(double rate, const LV2_Feature* const* features) noexcept;
 		void set_max_buffer_size(int size) noexcept;
+		void activate() noexcept;
 		void process(uint32_t n_samples) noexcept;
 
 		void write_current_path();
@@ -120,5 +121,8 @@ namespace NAM {
 		float inputLevel = 0;
 		float outputLevel = 0;
 		int32_t maxBufferSize = 512;
+		float bypassThresholdLinear = 0;
+		uint32_t silentSamples = 0;
+		bool smartBypassed = true;
 	};
 }
