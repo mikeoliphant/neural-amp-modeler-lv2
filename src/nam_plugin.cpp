@@ -252,6 +252,18 @@ namespace NAM {
 			}
 		}
 
+		if (*(ports.quality_scale) != qualityScale)
+		{
+			qualityScale = *(ports.quality_scale);
+
+			NeuralAudio::NeuralModel::SetDefaultQualityScaleFactor(qualityScale);
+
+			if (currentModel != nullptr)
+			{
+				currentModel->SetQualityScaleFactor(qualityScale);
+			}
+		}
+
 		float level;
 
 		float modelInputAdjustmentDB = 0;
