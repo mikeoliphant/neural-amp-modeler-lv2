@@ -101,4 +101,12 @@ A large collection of models is available at https://tonehunt.org
 		lv2:minimum -20.0;
 		lv2:maximum 20.0;
 		units:unit units:db;
+	], [
+		a lv2:ControlPort, lv2:InputPort;
+		lv2:index 6;
+		lv2:symbol "quality_scale";
+		lv2:name "Quality";
+		lv2:default 1.0;
+		lv2:minimum 0.0;
+		lv2:maximum 1.0;
 	].
