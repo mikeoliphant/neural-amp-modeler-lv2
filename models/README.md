@@ -1,4 +1,4 @@
-These are some sample NAM models designed to be used for performance testing on CPU-limited devices. They are all based on a [LiveSpice model of a Boss SD-1 pedal](https://blog.nostatic.org/2023/04/this-boss-sd-1-pedal-does-not-exist.html).
+These are some sample NAM models designed to be used for performance testing on CPU-limited devices. They are all based on a [LiveSpice model of a Boss SD-1 pedal](https://blog.nostatic.org/2023/04/this-boss-sd-1-pedal-does-not-exist.html). They are provided here under the [CC BY-NC-ND 4.0 license](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en).
 
 All models were trained for 300 epochs using the NAM "v1_1_1.wav" capture signal.
 
