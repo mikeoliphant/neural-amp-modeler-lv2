@@ -31,7 +31,12 @@ jobs:
   build-linux-x64:
     name: Build Linux x64
     needs: create_release
+    strategy:
+      matrix:
+        native_arch: [ON, OFF]
     runs-on: ubuntu-latest
+    env:
+      ARCHIVE_NAME: neural_amp_modeler_lv2_linux_x64${{ matrix.native_arch == 'ON' && 'v3' || '' }}.tgz
     steps:
     - uses: actions/checkout@v3.3.0
       with:
@@ -42,12 +47,12 @@ jobs:
       env:
         CXX: clang++
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLSTM_PREFER_NAM=OFF -DBUILD_NAMCORE=ON -DWAVENET_PREFER_NAM=OFF -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=${{ matrix.native_arch }} -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON
         cmake --build . --config $BUILD_TYPE -j4
 
     - name: Add LV2 Archive
       working-directory: ${{github.workspace}}/build
-      run: tar -czf neural_amp_modeler_lv2_linux_x64.tgz neural_amp_modeler.lv2
+      run: tar -czf ${{ env.ARCHIVE_NAME }} neural_amp_modeler.lv2
       
     - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
@@ -55,30 +60,35 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./build/neural_amp_modeler_lv2_linux_x64.tgz
-        asset_name: neural_amp_modeler_lv2_linux_x64.tgz
+        asset_path: ./build/${{ env.ARCHIVE_NAME }}
+        asset_name: ${{ env.ARCHIVE_NAME }}
         asset_content_type: application/tgz
 
-  build-linux-x64v3:
-    name: Build Linux x64v3
+  build-rpi:
+    name: Build Raspberry Pi
     needs: create_release
+    strategy:
+      matrix:
+        native_arch: [rpi4, rpi5]
     runs-on: ubuntu-latest
+    container: 
+      image: ghcr.io/tttapa/docker-arm-cross-toolchain:aarch64-rpi3-linux-gnu-gcc12
+    env:
+      ARCHIVE_NAME: neural_amp_modeler_lv2_${{ matrix.native_arch }}.tgz
     steps:
     - uses: actions/checkout@v3.3.0
       with:
         submodules: recursive
-        
+    
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
-      env:
-        CXX: clang++
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=ON -DBUILD_NAMCORE=ON -DLSTM_PREFER_NAM=OFF -DWAVENET_PREFER_NAM=OFF -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON -DCMAKE_TOOLCHAIN_FILE=/home/develop/opt/x-tools/aarch64-rpi3-linux-gnu/aarch64-${{ matrix.native_arch }}-linux-gnu.toolchain.cmake
         cmake --build . --config $BUILD_TYPE -j4
 
     - name: Add LV2 Archive
       working-directory: ${{github.workspace}}/build
-      run: tar -czf neural_amp_modeler_lv2_linux_x64v3.tgz neural_amp_modeler.lv2
+      run: tar -czf ${{ env.ARCHIVE_NAME }} neural_amp_modeler.lv2
       
     - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
@@ -86,14 +96,19 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./build/neural_amp_modeler_lv2_linux_x64v3.tgz
-        asset_name: neural_amp_modeler_lv2_linux_x64v3.tgz
+        asset_path: ./build/${{ env.ARCHIVE_NAME }}
+        asset_name: ${{ env.ARCHIVE_NAME }}
         asset_content_type: application/tgz
         
   build-windows:
     name: Build Windows
     needs: create_release
+    strategy:
+      matrix:
+        native_arch: [ON, OFF]
     runs-on: windows-latest
+    env:
+      ARCHIVE_NAME: neural_amp_modeler_lv2_win_x64${{ matrix.native_arch == 'ON' && 'v3' || '' }}.zip
     steps:
     - uses: actions/checkout@v3.3.0
       with:
@@ -102,11 +117,11 @@ jobs:
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake.exe -G "Visual Studio 17 2022" -A x64  -T ClangCL -DLSTM_PREFER_NAM=OFF -DWAVENET_PREFER_NAM=OFF -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON ..
+        cmake.exe -G "Visual Studio 17 2022" -A x64  -T ClangCL -DUSE_NATIVE_ARCH=${{ matrix.native_arch }} -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON ..
         cmake --build . --config=release -j4
 
     - name: Add LV2 Archive
-      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination neural_amp_modeler_lv2_win_x64.zip
+      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination ${{ env.ARCHIVE_NAME }}
       
     - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
@@ -114,34 +129,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./neural_amp_modeler_lv2_win_x64.zip
-        asset_name: neural_amp_modeler_lv2_win_x64.zip
-        asset_content_type: application/zip
-
-  build-windows-x64v3:
-    name: Build Windows x64v3
-    needs: create_release
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3.3.0
-      with:
-        submodules: recursive
-    
-    - name: Build Plugin
-      working-directory: ${{github.workspace}}/build
-      run: |
-        cmake.exe -G "Visual Studio 17 2022" -A x64 -DUSE_NATIVE_ARCH=ON -DLSTM_PREFER_NAM=OFF -DWAVENET_PREFER_NAM=OFF -T ClangCL ..
-        cmake --build . --config=release -j4
-
-    - name: Add LV2 Archive
-      run: Compress-Archive -Path ${{github.workspace}}\build\neural_amp_modeler.lv2 -Destination neural_amp_modeler_lv2_win_x64v3.zip
-      
-    - name: Upload Plugin Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./neural_amp_modeler_lv2_win_x64v3.zip
-        asset_name: neural_amp_modeler_lv2_win_x64v3.zip
+        asset_path: ./${{ env.ARCHIVE_NAME }}
+        asset_name: ${{ env.ARCHIVE_NAME }}
         asset_content_type: application/zip
