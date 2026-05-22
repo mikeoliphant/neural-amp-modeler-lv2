@@ -72,7 +72,7 @@ jobs:
         native_arch: [rpi4, rpi5]
     runs-on: ubuntu-latest
     container: 
-      image: ghcr.io/tttapa/docker-arm-cross-toolchain/aarch64-rpi3-linux-gnu:1.1.0-gcc12
+      image: ghcr.io/tttapa/docker-arm-cross-toolchain/aarch64-rpi3-linux-gnu-gcc12
     env:
       ARCHIVE_NAME: neural_amp_modeler_lv2_${{ matrix.native_arch }}.tgz
     steps:
