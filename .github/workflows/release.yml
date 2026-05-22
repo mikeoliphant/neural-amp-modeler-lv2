@@ -74,7 +74,7 @@ jobs:
     container: 
       image: ghcr.io/tttapa/docker-arm-cross-toolchain:aarch64-rpi3-linux-gnu
     env:
-      ARCHIVE_NAME: neural_amp_modeler_lv2_{{ matrix.native_arch }}.tgz
+      ARCHIVE_NAME: neural_amp_modeler_lv2_${{ matrix.native_arch }}.tgz
     steps:
     - uses: actions/checkout@v3.3.0
       with:
