@@ -82,8 +82,6 @@ jobs:
     
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
-      env:
-        CXX: clang++
       run: |
         cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON
         cmake --build . --config $BUILD_TYPE -j4
