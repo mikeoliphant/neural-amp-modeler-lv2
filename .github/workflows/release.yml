@@ -47,12 +47,12 @@ jobs:
       env:
         CXX: clang++
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=${{ matrix.native_arch }} -DLSTM_PREFER_NAM=OFF -DBUILD_NAMCORE=ON -DWAVENET_PREFER_NAM=OFF -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=${{ matrix.native_arch }} -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON
         cmake --build . --config $BUILD_TYPE -j4
 
     - name: Add LV2 Archive
       working-directory: ${{github.workspace}}/build
-      run: tar -czf $ARCHIVE_NAME neural_amp_modeler.lv2
+      run: tar -czf ${{ env.ARCHIVE_NAME }} neural_amp_modeler.lv2
       
     - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
@@ -60,8 +60,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./build/$ARCHIVE_NAME
-        asset_name: $ARCHIVE_NAME
+        asset_path: ./build/${{ env.ARCHIVE_NAME }}
+        asset_name: ${{ env.ARCHIVE_NAME }}
         asset_content_type: application/tgz
         
   build-windows:
