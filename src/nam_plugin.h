@@ -71,6 +71,7 @@ namespace NAM {
 		LV2_Log_Logger logger = {};
 		LV2_Worker_Schedule* schedule = nullptr;
 
+		NeuralAudio::NeuralModelLoader loader;
 		NeuralAudio::NeuralModel* currentModel = nullptr;
 		std::string currentModelPath;
 		float prevDCInput = 0;

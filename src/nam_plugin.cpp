@@ -128,7 +128,7 @@ namespace NAM {
 					{
 						lv2_log_trace(&nam->logger, "Staging model change: `%s`\n", msg->path);
 
-						model = NeuralAudio::NeuralModel::CreateFromFile(msg->path);
+						model = nam->loader.CreateFromFile(msg->path);
 					}
 
 					if (model != nullptr)
@@ -212,7 +212,7 @@ namespace NAM {
 	{
 		maxBufferSize = size;
 
-		NeuralAudio::NeuralModel::SetDefaultMaxAudioBufferSize(size);
+		loader.SetDefaultMaxAudioBufferSize(size);
 	}
 
 	void Plugin::process(uint32_t n_samples) noexcept
@@ -256,7 +256,7 @@ namespace NAM {
 		{
 			qualityScale = *(ports.quality_scale);
 
-			NeuralAudio::NeuralModel::SetDefaultQualityScaleFactor(qualityScale);
+			loader.SetDefaultQualityScaleFactor(qualityScale);
 
 			if (currentModel != nullptr)
 			{
