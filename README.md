@@ -9,6 +9,18 @@ To get the intended behavior, **you must run your audio host at the same sample 
 
 For amp-only models (the most typical), **you will need to run an impulse reponse after this plugin** to model the cabinet.
 
+## Usage
+
+Your DAW should expose the following input controls:
+
+**Input:** - Input (pre-model) gain in dB.
+
+**Output:** - Output (post-model) volume in dB.
+
+**Quality:** - Model quality (if applicable). For NAM A2 models, a value below 0.5 will give you a "lite" model and a value above 0.5 will give you a "full" model.
+
+**Model:** - The model file (ie: xxx.nam) to use.
+
 ## Models Supported and Performance
 
 The plugin supports both [Neural Amp Modeler (NAM)](https://github.com/sdatkinson/neural-amp-modeler) models (both A1 and A2) and [RTNeural keras json models](https://github.com/jatinchowdhury18/RTNeural) (like those used by [Aida-X](https://github.com/AidaDSP/AIDA-X)).
