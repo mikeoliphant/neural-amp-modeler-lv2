@@ -45,7 +45,7 @@ Models supported:
   Neural Amp Modeler (NAM): https://github.com/sdatkinson/neural-amp-modeler
   RTNeural keras/Aida-x models: https://github.com/jatinchowdhury18/RTNeural
 
-A large collection of models is available at https://tonehunt.org
+A large collection of models is available at https://www.tone3000.com
 """;
 
 	patch:writable <@NAM_LV2_ID@#model>;
