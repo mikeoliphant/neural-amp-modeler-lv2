@@ -60,7 +60,7 @@ if (SMART_BYPASS_ENABLED)
 	add_definitions(-DSMART_BYPASS_ENABLED)
 	message(STATUS "Smart Bypass enabled")
 else()
-	message(STATUS "Smart Bypass enabled")
+	message(STATUS "Smart Bypass NOT enabled")
 endif (SMART_BYPASS_ENABLED)
 
 set_target_properties(neural_amp_modeler
