@@ -117,7 +117,7 @@ jobs:
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake.exe -G "Visual Studio 17 2022" -A x64  -T ClangCL -DUSE_NATIVE_ARCH=${{ matrix.native_arch }} -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON ..
+        cmake.exe -G "Visual Studio 18 2026" -A x64  -T ClangCL -DUSE_NATIVE_ARCH=${{ matrix.native_arch }} -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON ..
         cmake --build . --config=release -j4
 
     - name: Add LV2 Archive
