@@ -45,6 +45,8 @@ namespace NAM {
 	{
 		this->sampleRate = sampleRate;
 
+		loader.SetExternalSampleRate((int)sampleRate);
+
 		// for fetching initial options, can be null
 		LV2_Options_Option* options = nullptr;
 
