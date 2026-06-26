@@ -41,11 +41,17 @@ jobs:
     - uses: actions/checkout@v3.3.0
       with:
         submodules: recursive
+
+    - name: Setup GCC 15
+      uses: egor-tensin/setup-gcc@v2
+      with:
+        version: '15'
     
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
       env:
-        CXX: clang++
+        CXX: g++-15
+        CXXFLAGS: "-static-libstdc++ -static-libgcc"
       run: |
         cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_NATIVE_ARCH=${{ matrix.native_arch }} -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON
         cmake --build . --config $BUILD_TYPE -j4
@@ -72,7 +78,7 @@ jobs:
         native_arch: [rpi4, rpi5]
     runs-on: ubuntu-latest
     container: 
-      image: ghcr.io/tttapa/docker-arm-cross-toolchain:aarch64-rpi3-linux-gnu-gcc12
+      image: ghcr.io/tttapa/docker-arm-cross-toolchain:aarch64-rpi3-linux-gnu-gcc15
     env:
       ARCHIVE_NAME: neural_amp_modeler_lv2_${{ matrix.native_arch }}.tgz
     steps:
@@ -82,6 +88,8 @@ jobs:
     
     - name: Build Plugin
       working-directory: ${{github.workspace}}/build
+      env:
+        CXXFLAGS: "-static-libstdc++ -static-libgcc"
       run: |
         cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_NAMCORE=ON -DBUILD_INTERNAL_STATIC_WAVENET=ON -DBUILD_INTERNAL_STATIC_LSTM=ON -DCMAKE_TOOLCHAIN_FILE=/home/develop/opt/x-tools/aarch64-rpi3-linux-gnu/aarch64-${{ matrix.native_arch }}-linux-gnu.toolchain.cmake
         cmake --build . --config $BUILD_TYPE -j4
