@@ -8,8 +8,8 @@ else()
 		-Wall 
 		# -Wpedantic -Wextra -Wstrict-aliasing -Wunreachable-code -Weffc++ -Wno-unused-parameter
 		"$<$<CONFIG:DEBUG>:-Og;-ggdb>"
-		"$<$<CONFIG:RELWITHDEBINFO>:-Ofast>"
-		"$<$<CONFIG:RELEASE>:-Ofast>"
+		"$<$<CONFIG:RELWITHDEBINFO>:-O3>"
+		"$<$<CONFIG:RELEASE>:-O3>"
 	)
 endif()
 
