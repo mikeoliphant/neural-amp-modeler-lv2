@@ -8,8 +8,8 @@ else()
 		-Wall 
 		# -Wpedantic -Wextra -Wstrict-aliasing -Wunreachable-code -Weffc++ -Wno-unused-parameter
 		"$<$<CONFIG:DEBUG>:-Og;-ggdb>"
-		"$<$<CONFIG:RELWITHDEBINFO>:-Ofast>"
-		"$<$<CONFIG:RELEASE>:-Ofast>"
+		"$<$<CONFIG:RELWITHDEBINFO>:-O3>"
+		"$<$<CONFIG:RELEASE>:-O3>"
 	)
 endif()
 
@@ -19,14 +19,14 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "(amd64)|(AMD64)|(x86_64)")
 
 	if (USE_NATIVE_ARCH)
 		if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-			add_compile_options(/arch:AVX2)
+			add_compile_options(/arch:AVX2 /fp:fast)
 			message(STATUS "Enabling /arch:AVX2")		 
 		else()
 			add_compile_options(-march=x86-64-v3)
 			message(STATUS "Enabling -march=x86-64-v3")
 		endif()
 	else()
-		set(ENABLE_MULTIFRAME_8X8_CONVOLUTION OFF CACHE BOOL "" FORCE) 
+		set(MULTIFRAME_8X8_CONVOLUTION OFF CACHE BOOL "0" FORCE) 
 	endif (USE_NATIVE_ARCH)
 endif ()
 
