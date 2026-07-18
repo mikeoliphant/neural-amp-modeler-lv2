@@ -222,6 +222,12 @@ namespace NAM {
 		lv2_atom_forge_set_buffer(&atom_forge, (uint8_t*)ports.notify, ports.notify->atom.size);
 		lv2_atom_forge_sequence_head(&atom_forge, &sequence_frame, uris.units_frame);
 
+		if (*(ports.quality_scale) != loader.GetDefaultQualityScaleFactor())
+		{
+			// Do this before checking the model path parameter so we make sure to set the quality first
+			loader.SetDefaultQualityScaleFactor(*(ports.quality_scale));
+		}
+
 		LV2_ATOM_SEQUENCE_FOREACH(ports.control, event)
 		{
 			if (event->body.type == uris.atom_Object)
@@ -254,24 +260,17 @@ namespace NAM {
 			}
 		}
 
-		if (*(ports.quality_scale) != qualityScale)
-		{
-			qualityScale = *(ports.quality_scale);
-
-			loader.SetDefaultQualityScaleFactor(qualityScale);
-
-			if (currentModel != nullptr)
-			{
-				currentModel->SetQualityScaleFactor(qualityScale);
-			}
-		}
-
 		float level;
 
 		float modelInputAdjustmentDB = 0;
 
 		if (currentModel != nullptr)
 		{
+			if (*(ports.quality_scale) != currentModel->GetQualityScaleFactor())
+			{
+				currentModel->SetQualityScaleFactor(*(ports.quality_scale));
+			}
+
 			modelInputAdjustmentDB = currentModel->GetRecommendedInputDBAdjustment();
 
 #ifdef SMART_BYPASS_ENABLED

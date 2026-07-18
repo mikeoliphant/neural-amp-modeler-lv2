@@ -76,7 +76,6 @@ namespace NAM {
 		std::string currentModelPath;
 		float prevDCInput = 0;
 		float prevDCOutput = 0;
-		float qualityScale = 1.0f;
 
 		Plugin();
 		~Plugin();
