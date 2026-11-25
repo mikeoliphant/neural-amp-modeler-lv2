@@ -47,7 +47,7 @@ target_include_directories(neural_amp_modeler PUBLIC ../deps/denormal)
 target_link_libraries(neural_amp_modeler PRIVATE NeuralAudio)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
-source_group(NAM ${CMAKE_CURRENT_SOURCE_DIR} FILES ${NA_SOURCES})
+source_group(NAM FILES ${NA_SOURCES})
 
 option(DISABLE_DENORMALS "Disable floating point denormals" ON)
 
